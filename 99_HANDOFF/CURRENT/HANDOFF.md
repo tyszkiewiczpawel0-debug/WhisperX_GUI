@@ -1,35 +1,41 @@
-# WHISPERX_GUI — checkpoint D1
+# WHISPERX_GUI — checkpoint D2
 
-Data: 14.10.2026. Odbiorca: główna rozmowa ChatGPT WHISPERX_GUI za pośrednictwem użytkownika.
+Data: 14.10.2026. Odbiorca: główna rozmowa WHISPERX_GUI, za pośrednictwem użytkownika.
 
-**D1: COMPLETE w zakresie wykonawczym, do formalnego odbioru użytkownika. D0 zatwierdzony 14.10.2026. D2 nie rozpoczęto.**
+**D2: COMPLETE wykonawczo, do formalnego odbioru. D0/D1 zatwierdzone zleceniem D2. D3 nie rozpoczęto.**
 
-## Repozytorium i źródła prawdy
+## Funkcje i ponowne wykorzystanie
 
-Lokalizacja: `C:\AI\WhisperX_GUI`; branch `main`; brak remote/push. Commit inicjalizacji: `558c9474b36fe2354c3604f04051d0777ba7a7b5`. Końcowy commit checkpointu wskazuje `HEAD` na main po zakończeniu D1; pełne SHA jest przekazane w końcowym handoffie w rozmowie i dostępne przez `git rev-parse HEAD`. Wpisywanie SHA commita w jego własnej treści zmieniłoby to SHA. Po późniejszych zmianach commit D1 można odnaleźć przez `git log --all --grep="Record D1 verification and handoff"`.
+GUI Tkinter: pojedyncze audio/wideo, metadane, jeden profil z pliku, parametry urządzenia/compute/batch/alignment, osobne sprawdzenie i przygotowanie WAV, pełna transkrypcja, status/log, anulowanie i otwarcie wyników. Model large-v3 i język pl pozostają stałe dla jedynego profilu.
 
-Obowiązują: [kontrakt](../../docs/PROJECT_CONTRACT.md), [standard pomocniczy](../../PROJECT_STANDARD_v0.2.md), [AGENTS](../../AGENTS.md), [stan](../../docs/CURRENT_STATE.md), [architektura](../../docs/ARCHITECTURE.md), [dane](../../docs/DATA.md), [decyzje](../../docs/DECISIONS.md). Raporty D0 pozostają w root; ich historyczny status zastępuje informacja o zatwierdzeniu w CURRENT_STATE. Jedyna obowiązująca kopia kontraktu jest w docs, bez zmiany treści i wersji.
+REUSE: istniejący Python/stos, Tkinter, FFprobe/FFmpeg, WhisperX/faster-whisper/CTranslate2, VAD pyannote, modele ASR/PL i writery TXT/SRT/JSON. ADAPT: sekwencja API i zwalniania modeli z transcribe_trip_meeting.py, bez jego importu. BUILD: kontroler/GUI, walidacja, Job Object, offline/preflight, unikatowe katalogi, manifest i kontrola kompletności. Nie przeniesiono błędnej srt_ts.
 
-Struktura: README.md, AGENTS.md, .gitignore; docs z pięcioma wymaganymi dokumentami i snapshotem pakietów; config z local.example.toml i jednym WEBINAR_RUI_PL.json; src/README.md i tests/README.md opisujące przyszły kod/testy; trzy raporty D0 i standard w root; jeden bieżący plik handoffu.
+## Weryfikacja
 
-## Ustalenia i granice
+PASS: 11 testów logiki/integracji, responsywność Tkinter, rzeczywista konwersja WAV/MKV, błędne wejście, brak/wiele ścieżek, ostrzeżenie długości, brak nadpisania, Job Object kończący potomny FFmpeg i zachowujący niezależny proces, biblioteczne eksporty i granice minuty/godziny, blokada sieci i zapisów poza zadaniem. Składnia Python/PowerShell, ignore, linki zmienianych dokumentów, staged diff bez danych wykonawczych i sygnatur sekretów — PASS.
 
-Reuse istniejącego Pythona 3.11.9, WhisperX 3.8.6, torch 2.8.0+cu128, FFmpeg 8.1.2, lokalnych modeli oraz bibliotecznych mechanizmów. GPU rozpoznane w D0: RTX 5070 Ti. Zatwierdzono wyniki discovery i autoryzowano D1; rekomendowana architektura Tkinter → kontroler → przygotowanie → adapter API w osobnym procesie → eksport nie jest zaimplementowana. Profil ma startowe large-v3/pl/cuda/float16/batch 8/alignment=true/diarization=false.
+GPU/offline: potwierdzono dwa pełne przebiegi próbki 20 s, large-v3/pl/cuda/float16/batch 8 + alignment PL na RTX 5070 Ti, 2 segmenty i 58 słów. Ostatni 23,766 s, komplet pięciu plików, succeeded. Anulowanie rzeczywistego ASR i alignmentu — PASS, cancelled, WAV zachowane. Offline oznacza lokalne zasoby i aktywne blokady bibliotek/Python, nie audyt sieci kodu natywnego.
 
-Konfiguracja stanowiska: wzór TOML, przyszła lokalna kopia config/local.toml jest ignorowana. Brak loadera, entry pointu aplikacji, instalacji i drugiego venv. README opisuje obecne stanowisko i uczciwie ograniczoną procedurę odtworzenia na nowym komputerze. Snapshot pakietów nie zapewnia wheel/indeksów/hashy ani model cache.
+Brak FAIL w końcowych testach. NOT TESTED: pełny RUI, odsłuch/terminologia/synchronizacja, RAM/VRAM długiego materiału, CPU/inne compute, pełny przebieg bez alignmentu, drugie stanowisko, brak GPU/OOM/dysk pełny/awaria systemu i ręczny odbiór wyglądu GUI. Nie przedstawiać tych elementów jako PASS.
 
-Nieweryfikowane: pełne CUDA/CTranslate2 i offline, batch 8/VRAM, jakość i synchronizacja RUI, anulowanie drzewa procesów. Ryzyka D0: pobranie Punkt przez NLTK, błędne przeniesienie sekund w źródłowym srt_ts, nadpisywanie starych wyników przez skrypt. Nie importować skryptu źródłowego i nie traktować istniejących artefaktów jako testu nowej aplikacji.
+Szczegóły i identyfikatory lokalnych dowodów: [D2_TEST_REPORT](../../docs/D2_TEST_REPORT.md). Końcowy pipeline: runs/jobs/20261014_181727_8d98f212a70f455ea3f9315c5f6d1d32, prywatne run.json i process.log poza Git.
 
-## Kontrole i zakres zmian
+## Ograniczenia i decyzje
 
-PASS: składnia TOML/JSON, wartości i typy profilu, 19 reprezentatywnych ścieżek ignorowanych oraz 7 dozwolonych, wszystkie lokalne linki Markdown, pojedynczy kontrakt i hashe kontraktu/standardu także w pierwszym commicie. Przejrzano zakres staged diff: 18 plików tekstowych inicjalizacji, każdy poniżej 100 KB, bez danych wykonawczych; dodatkowy skan sygnatur kluczy/tokenów niczego nie wykrył. Checkpoint jest dziewiętnastym plikiem. Brak testów silnika.
+TorchCodec zgłasza niedostępne DLL; ścieżka FFmpeg → audio w pamięci działa. Nie naprawiano ani nie aktualizowano środowiska. Lightning adaptuje checkpoint tylko w pamięci, bez migracji pliku. Brak koniecznej decyzji blokującej D2.
 
-Kontrola whitespace nowych dokumentów/konfiguracji przeszła. Pełna kontrola importowanych dokumentów wskazała 7 istniejących końcówek z dwiema spacjami Markdown w kontrakcie i standardzie; zachowano je celowo, aby nie zmieniać dostarczonej treści. `.gitattributes` wyłącza konwersję końców linii wyłącznie tych dwóch dokumentów. Powtórzony snapshot metadanych 46565 plików źródła ma identyczny hash jak przed pracą. Końcowy Git/main/remote/status jest sprawdzany po commicie checkpointu i przekazywany w rozmowie.
+Próg długości 0,1 s jest konfigurowalny, bez gwarancji synchronizacji. Wiele ścieżek i offset >0,1 s są odrzucane; drobne offsety jawnie raportowane. Pośrednie zachowujemy także po sukcesie. Każda operacja tworzy nowy katalog; transkrypcja ponownie przygotowuje WAV z oryginału. Awaria całej aplikacji/systemu może pozostawić running; brak automatycznej naprawy/wznowienia.
 
-Bez zmian źródłowego WhisperX, venv, modeli, nagrań i wyników; wyłącznie odczyty. Referencyjny snapshot metadanych 46565 plików źródła (ścieżka, rozmiar, mtime_ns) przed D1: SHA256 `d6d182d80908b249c736ce9ad3f8494560f271cca884c5381652aa86da2fc2ad`. To kontrola metadanych, nie pełny hash zawartości środowiska. Kontrakt SHA256 `6fceb18b8e3170c78561182869c5d0ba542450eea61085b8994bf00f9594859c`; standard `b004ed052a224e3be2d3b4ec379cbfca819fc933b9e79b729c79cfc31cf30e1c`.
+## Ochrona i Git
 
-## Odstępstwa i start D2
+Źródło C:\AI\WhisperX, .venv, modele, nagrania i wcześniejsze wyniki pozostały tylko do odczytu. Porównanie 46565 ścieżek/rozmiarów/mtime_ns przed i po D2 identyczne; nie jest to pełny hash zawartości. Kontrakt i standard zachowały oryginalne SHA256 wskazane w raporcie. Bez instalacji, pobrań, drugiego venv, zmian globalnych Windows i push.
 
-Brak odstępstw od wymaganej minimalnej dokumentacji. Równoważny TOML zamiast .env jest dopuszczony zleceniem. Standardowy model snapshotów danych zastosowano proporcjonalnie: bez kopiowania dużych nagrań podczas inicjalizacji; pochodzenie wyników ma zapewnić run.json w D2. Raporty D0 pozostawiono historyczne, bez przepisywania ich treści.
+Repozytorium C:\AI\WhisperX_GUI, branch main. Commit implementacji: **6c611e121ac290ee08807649913229b512fc44cb**. Po nim working tree był czysty. Niniejszy handoff stanowi osobny commit „Record D2 verification and handoff”; jego SHA jest bieżącym HEAD po zakończeniu D2 i jest przekazane w końcowej odpowiedzi. SHA własnego commita nie może być wpisane do jego treści bez zmiany SHA. Po commicie checkpointu kontrolowane są status i branch. Brak remote/push; dane i lokalny TOML ignorowane.
 
-Przed D2: odbiór D1 i autoryzacja implementacji przez użytkownika; potwierdzenie wariantu integracji oraz lokalizacji wyników, retencji pośrednich, progu długości i zakresu testów wykonawczych. Propozycja kolejności D2: walidacja konfiguracji/zasobów i bezpieczny katalog zadania → adapter/pipeline z logami → kontroler/anulowanie → GUI → uzgodnione testy. Stosować REUSE_MATRIX, nie budować silnika od nowa. Pilotaż RUI jest D3; instalacje/pobrania wymagają odrębnej zgody. Po D1 praca zostaje zatrzymana.
+## Pierwszy start i proponowany D3
+
+Dwuklik **Start.cmd** w repozytorium. Lokalny config/local.toml jest gotowy, output wskazuje runs/jobs. Wybierz plik → Sprawdź plik → opcjonalnie Przygotuj WAV → Transkrybuj. Przerwij kończy własne drzewo procesów; Otwórz wyniki pokazuje rezultaty. Pełna instrukcja i nowe stanowisko: [README](../../README.md).
+
+Po odbiorze D2 użytkownik osobno autoryzuje D3 i wskazuje webinar RUI. Rekomendacja: inspekcja metadanych, przygotowanie i kontrola długości/offsetów, pełna transkrypcja w nowym katalogu, sprawdzenie pięciu wyników, odsłuch początku/środka/końca i ocena terminologii, raport jakości oraz RAM/VRAM. Bez streszczeń, diarizacji i analizy prawnej.
+
+Prace D2 zakończone. Pilotażu RUI nie uruchomiono. Decyzja o odbiorze i dalszym etapie należy wyłącznie do użytkownika.
