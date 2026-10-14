@@ -1,14 +1,14 @@
-# WHISPERX_GUI — końcowy checkpoint wykonawczy MVP / D4
+# WHISPERX_GUI — checkpoint zamknięcia MVP v1
 
 Data: 14.10.2026. Odbiorca: główna rozmowa ChatGPT projektu, za pośrednictwem użytkownika.
 
-**D4: COMPLETE wykonawczo, do odbioru. Implementacja i pilotaż zakończone. D0, D1, D2 po poprawce launchera, D2.1 i D3: APPROVED. Formalne zamknięcie MVP oczekuje na decyzję użytkownika.**
+**MVP v1 CLOSED / D4 APPROVED — decyzja użytkownika z 14.10.2026 w zleceniu końcowego przeglądu. D0–D3 APPROVED. Implementacja i pilotaż zakończone; dalszej fazy nie rozpoczęto.**
 
 ## Ocena i decyzja
 
 [Raport D4](../../docs/D4_MVP_REVIEW.md) ocenia wszystkie dziewięć kryteriów kontraktu: **6 PASS, 3 PARTIAL, 0 FAIL**. Brak potwierdzonej nowej usterki blokującej. Niepełne dowody: pełny przebieg obsługiwany przez widoczne GUI, responsywność podczas ASR/alignmentu i uruchomienie na drugim stanowisku. Nie należy przedstawiać ich jako pełnego PASS.
 
-Rekomendacja: zamknąć MVP dla sprawdzonego stanowiska i profilu, jeżeli użytkownik akceptuje te luki; jeśli wymaga pełnego wykonawczego PASS, pozostawić zamknięcie otwarte do osobno zleconego uzupełnienia dowodów. Work nie zmienia kontraktu, nie zamyka MVP i nie otwiera kolejnej wersji.
+Użytkownik formalnie zaakceptował i zamknął MVP z tymi ograniczeniami. Nie przekwalifikowano PARTIAL na PASS i nie zmieniono kontraktu. Dalsza weryfikacja lub rozwój wymaga nowego zlecenia.
 
 ## Uruchomienie i odtworzenie kontekstu
 
@@ -28,10 +28,16 @@ WAV: 16 kHz mono, delta długości +0,312 ms. Ostatni koniec +23,688 ms poza WAV
 
 D3: identyczny SHA-256 oryginału przed/po `fd7bc2854a3a01a889972f9c2252e89e3a2c2c9320d78dc68398e53327cb6660`; 46565 plików źródłowego WhisperX bez zmian ścieżek/rozmiarów/mtime_ns, nie pełny hash instalacji. D4 nie zmieniał źródła, kodu, konfiguracji, nagrań, wyników, modeli ani środowiska; bez nowego przetwarzania, instalacji, pobierania i push. Nie powtarzano pełnego audytu źródła.
 
-D4: nowy D4_MVP_REVIEW, aktualizacja README, CURRENT_STATE, DECISIONS i tego handoffu. ARCHITECTURE/DATA i raporty historyczne zachowane. Linki bieżącego handoffu prowadzą przez ../../ do katalogu głównego repozytorium. Kontrakt/standard bez zmian.
+Przegląd zamknięcia: wejściowo main / d85d5d5, czysty working tree, osiem commitów, brak tagów i remote. Uzupełniono wyłącznie README, CURRENT_STATE, DECISIONS, status raportu D4 i ten handoff. Odnośniki handoffu zweryfikowano. Kod, profil, lokalny TOML i środowisko bez zmian.
 
-Branch `main`; wejściowy commit `9fdcd0c`, wejściowy working tree czysty, brak remote. Lokalny commit D4: `Document D4 MVP review and closure recommendation`; SHA i wynik kontroli statusu po commicie przekazane w odpowiedzi końcowej. Przed commitem kontrola śledzonych plików, ignore, linków, staged diff i danych wrażliwych. Bez danych użytkownika w zakresie commita.
+Bezpieczeństwo: sprawdzono śledzone ścieżki i 79 unikalnych blobów osiągalnych z całej historii Git. Brak plików nagrań/transkrypcji, INPUT/runs, modeli/cache/.venv, lokalnego TOML i wykrytych sekretów. Dokumentacja historyczna zawiera nazwy/ścieżki stanowiska, metadane pilotażu i prompt terminologiczny; nie zawiera prywatnych wycinków transkrypcji. Kontrola wzorców sekretów nie jest gwarancją wykrycia dowolnej poufnej treści. Dane lokalne pozostają ignorowane. Git fsck nie wykazał uszkodzeń; zgłosił 11 nieosiągalnych blobów, które nie są wysyłane przez push gałęzi/tagu. Nie usuwano ich ani nie przepisywano historii.
+
+Lekka weryfikacja: składnia AST wszystkich modułów i testów, TOML/JSON, walidacja konfiguracji i obecności zasobów, ignore i spójność odnośników; dwa testy jednostkowe profilu oraz przekazania promptu z atrapą silnika: PASS. Bez silnika, transkrypcji, instalacji lub pobrań. Historyczne wyniki i ograniczenia pozostają bez zmian.
+
+Checkpoint: końcowy commit dokumentacyjny na main oraz tag mvp-v1.0; wynik utworzenia, SHA i czystość po commicie w odpowiedzi końcowej. Do odczytu identyfikatora: `git rev-parse mvp-v1.0^{commit}`. Nie nadpisywać istniejącego tagu.
+
+GitHub: publikacja autoryzowana wyłącznie jako prywatne WhisperX_GUI. W tej sesji brak GitHub CLI i nieinteraktywnego poświadczenia Git; przeglądarka wymaga logowania, a wyszukiwanie konektorem na koncie zwróciło błąd dostępu. Nie potwierdzono istnienia docelowego repozytorium, nie utworzono repozytorium ani origin i nic nie wysłano. Po zalogowaniu należy sprawdzić docelowe konto/repozytorium i widoczność PRIVATE; jeżeli nie istnieje, utworzyć puste WhisperX_GUI bez README/licencji/.gitignore. Następnie ustawić origin na zweryfikowany adres, sprawdzić zdalne refs i wysłać main oraz mvp-v1.0 bez force i bez nadpisania zdalnego stanu.
 
 [Stan](../../docs/CURRENT_STATE.md), [decyzje](../../docs/DECISIONS.md), [architektura](../../docs/ARCHITECTURE.md), [dane](../../docs/DATA.md), [D2](../../docs/D2_TEST_REPORT.md), [D2.1](../../docs/D2_1_TEST_REPORT.md).
 
-Następny krok: decyzja użytkownika w głównej rozmowie ChatGPT. Propozycje w raporcie D4 są wyłącznie opcjami. Po przekazaniu tego checkpointu praca zostaje zatrzymana.
+Bezpieczny powrót lokalny: README → config/local.toml → Start.cmd. Git nie przechowuje środowiska, modeli ani wyników; samo sklonowanie nie odtwarza stanowiska. Trzy PARTIAL nadal obowiązują. Jedyna niedokończona czynność tego zlecenia to publikacja po zapewnieniu dostępu do GitHub; nie stanowi to blokera lokalnego użycia.

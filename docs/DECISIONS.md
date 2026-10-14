@@ -64,3 +64,9 @@ Wpisy D-24–D-28 i raport D3 opisują stan historyczny przed kontrolą użytkow
 - D-32 (ocena wykonawcza D4): dziewięć kryteriów kontraktu: 6 PASS, 3 PARTIAL, 0 FAIL. Niepełne dowody pełnego przebiegu przez widoczne GUI, responsywności podczas silnika i przeniesienia na inne stanowisko. Szczegóły i granice PASS: [raport D4](D4_MVP_REVIEW.md).
 - D-33 (rekomendacja, nie decyzja użytkownika): zamknąć MVP dla sprawdzonego stanowiska/profilu przy świadomej akceptacji trzech PARTIAL; w razie wymogu pełnego wykonawczego PASS pozostawić zamknięcie otwarte do osobno zleconej weryfikacji. Nie zmienia to kontraktu. Formalna decyzja wyłącznie w głównej rozmowie ChatGPT.
 - D-34 (wykonawcza D4): jeden raport D4 i jeden bieżący handoff; historyczne raporty zachowane, ARCHITECTURE/DATA aktualne bez potrzeby zmiany. Propozycje rozwoju nie stanowią autoryzacji ani standardu Ekosystemu. D4 COMPLETE wykonawczo; po lokalnym commicie zakończyć pracę.
+
+## Zamknięcie i utrwalenie repozytorium — 14.10.2026
+
+- D-35 (użytkownik, zlecenie końcowego przeglądu): MVP v1 CLOSED / D4 APPROVED, 6 PASS / 3 PARTIAL / 0 FAIL. Zastępuje oczekiwanie na odbiór w D-33/D-34 i historycznym raporcie D4; bez zmiany trzech PARTIAL lub otwierania dalszego rozwoju.
+- D-36 (użytkownik): jednorazowy przegląd, niezbędne uzupełnienia, lekka weryfikacja, lokalny commit i nowy tag mvp-v1.0; po pozytywnym przeglądzie bezpieczeństwa autoryzowane prywatne repozytorium GitHub WhisperX_GUI i push main oraz tego tagu. To odrębna autoryzacja zastępująca wcześniejszy brak zgody na remote/push; bez nadpisywania historii/tagów i bez repozytorium publicznego.
+- D-37 (wykonawcza): kod, profil i środowisko bez zmian. Zachować raporty historyczne, uzupełnić status, wymagania/reuse i jeden bieżący handoff; zweryfikować jego odnośniki do korzenia. Git nie stanowi kopii zapasowej ignorowanych danych ani gotowej instalacji środowiska.

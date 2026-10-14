@@ -2,7 +2,7 @@
 
 Lokalne GUI Tkinter do przygotowania i transkrypcji pojedynczego nagrania. Jeden profil WEBINAR_RUI_PL, bez diarizacji, streszczeń i kolejki.
 
-**D0–D3: APPROVED. D4: COMPLETE wykonawczo — formalne zamknięcie MVP oczekuje na decyzję użytkownika.** [Ocena MVP: 6 PASS, 3 PARTIAL, 0 FAIL](docs/D4_MVP_REVIEW.md). [Raport D3](docs/D3_PILOT_REPORT.md). Dowody: [raport D2.1](docs/D2_1_TEST_REPORT.md), [raport D2](docs/D2_TEST_REPORT.md), [stan](docs/CURRENT_STATE.md), [handoff](99_HANDOFF/CURRENT/HANDOFF.md).
+**MVP v1 CLOSED / D4 APPROVED — decyzja użytkownika z 14.10.2026.** [Ocena MVP: 6 PASS, 3 PARTIAL, 0 FAIL](docs/D4_MVP_REVIEW.md). Trzy PARTIAL pozostają: pełny przebieg sterowany przez widoczne GUI, pomiar responsywności podczas silnika i test drugiego stanowiska. [Raport D3](docs/D3_PILOT_REPORT.md). Dowody: [raport D2.1](docs/D2_1_TEST_REPORT.md), [raport D2](docs/D2_TEST_REPORT.md), [stan](docs/CURRENT_STATE.md), [handoff](99_HANDOFF/CURRENT/HANDOFF.md).
 
 ## Pierwsze uruchomienie
 
@@ -30,7 +30,7 @@ Brak lokalnych modeli, NLTK lub CUDA kończy zadanie czytelnym błędem. Pobiera
 
 ## Nowe stanowisko
 
-1. Uzyskaj lokalną kopię repozytorium. Nie skonfigurowano remote ani publikacji.
+1. Uzyskaj kopię repozytorium z zachowaną historią Git; zaakceptowany checkpoint identyfikuje tag `mvp-v1.0`. Status publikacji jest w bieżącym handoffie. Git nie zawiera lokalnej konfiguracji, nagrań, wyników ani środowiska/modeli; ich odtworzenie lub osobna kopia zapasowa są niezależne od kopii kodu.
 2. Wymagany Windows, Python 3.11 z Tkinter i istniejący zgodny stos WhisperX oraz FFmpeg/FFprobe. [Snapshot pakietów](docs/ENVIRONMENT_PACKAGES.txt) nie jest lockfile ani instrukcją automatycznej instalacji. Odtworzenie brakującego środowiska wymaga osobnej decyzji; nie kopiuj .venv.
 3. Skopiuj config/local.example.toml do config/local.toml tylko jeśli nie istnieje. Wpisz pełne ścieżki, bez zmiennych i `~`. Pole python zachowaj jako pojedynczo cytowany literał TOML, jak we wzorze.
 4. Wskaż HF hub z kompletnymi lokalnymi snapshotami Systran/faster-whisper-large-v3 i jonatasgrosman/wav2vec2-large-xlsr-53-polish, torch home, NLTK punkt_tab/polish oraz narzędzia. Wagi VAD należą do pakietu WhisperX. Pobranie brakujących zasobów wymaga osobnej autoryzacji.
@@ -44,4 +44,10 @@ Brak lokalnych modeli, NLTK lub CUDA kończy zadanie czytelnym błędem. Pobiera
 - Historyczne D0: [discovery](DISCOVERY_REPORT.md), [reuse](REUSE_MATRIX.md), [rekomendacja](MVP_RECOMMENDATION.md).
 - [Konfiguracja](config/local.example.toml), [profil](config/WEBINAR_RUI_PL.json), [moduły](src/README.md), [testy](tests/README.md).
 
-D3 zatwierdzono po dodatkowym odsłuchu użytkownika 14.10.2026. Pierwotny raport D3 zachowuje historyczny status PARTIAL. Formalne zamknięcie MVP należy do użytkownika w głównej rozmowie ChatGPT; dalszy rozwój wymaga osobnego zlecenia.
+## Obecne stanowisko i ponowne wykorzystanie
+
+Potwierdzone: Windows, Windows PowerShell 5.1, Python 3.11.9 z istniejącego środowiska WhisperX, Tkinter, WhisperX 3.8.6, torch 2.8.0+cu128, faster-whisper 1.2.1 i CTranslate2 4.8.2. Pilotaż wykonano na RTX 5070 Ti z FFmpeg/FFprobe 8.1.2. Wymagane są lokalne modele ASR/alignment/VAD oraz NLTK opisane wyżej. Konkretne ścieżki wykonawcze odczytywane są wyłącznie z ignorowanego `config/local.toml`; katalog wejściowy w nim to historyczna lokalizacja źródłowego WhisperX, a wybór pliku w GUI może wskazać inne miejsce. Nie przenoś tych ścieżek do kodu.
+
+Architektura: GUI → kontroler → osobny worker → FFmpeg → WhisperX/alignment → eksport. Do przyszłego wykorzystania nadają się walidacja konfiguracji, przygotowanie audio, kontroler z anulowaniem własnego drzewa procesów, adapter offline oraz manifest i walidacja eksportów. Szczegóły i ograniczenia ochrony: [architektura](docs/ARCHITECTURE.md) i [macierz reuse](REUSE_MATRIX.md). Ich przeniesienie wymaga sprawdzenia zależności i testów w docelowym projekcie; nie ustanawia standardu Ekosystemu.
+
+D3 zatwierdzono po dodatkowym odsłuchu użytkownika 14.10.2026. Pierwotny raport D3 zachowuje historyczny status PARTIAL. MVP zamknięto decyzją użytkownika, bez przekwalifikowania luk dowodowych na PASS. Dalszy rozwój wymaga osobnego zlecenia.

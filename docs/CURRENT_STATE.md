@@ -1,8 +1,8 @@
 # Bieżący stan — 14.10.2026, checkpoint D4
 
-**D0, D1, D2 po poprawce launchera, D2.1 i D3: APPROVED przez użytkownika. D4: COMPLETE wykonawczo, do odbioru. Formalne zamknięcie MVP oczekuje na decyzję użytkownika w głównej rozmowie ChatGPT.**
+**MVP v1 CLOSED / D4 APPROVED — decyzja użytkownika z 14.10.2026 w zleceniu końcowego przeglądu repozytorium. D0, D1, D2 po poprawce launchera, D2.1 i D3: APPROVED. Nie otwarto kolejnej fazy rozwoju.**
 
-Implementacja i pilotaż zakończone. [Ocena kontraktu D4](D4_MVP_REVIEW.md): 6 PASS, 3 PARTIAL, 0 FAIL. PARTIAL: brak pełnego przebiegu sterowanego przez widoczne GUI, pomiaru jego responsywności podczas silnika oraz testu drugiego stanowiska. Nie wykryto nowej blokującej usterki. Rekomendacja zamknięcia dla sprawdzonego stanowiska/profilu wymaga świadomej akceptacji tych luk przez użytkownika; nie jest zmianą kontraktu ani samodzielnym odbiorem.
+Implementacja i pilotaż zakończone. [Ocena kontraktu D4](D4_MVP_REVIEW.md): 6 PASS, 3 PARTIAL, 0 FAIL. PARTIAL: brak pełnego przebiegu sterowanego przez widoczne GUI, pomiaru jego responsywności podczas silnika oraz testu drugiego stanowiska. Nie wykryto nowej blokującej usterki. Zamknięcie przez użytkownika zachowuje te ograniczenia; nie zmienia kontraktu ani ocen na PASS.
 
 Jeden pełny przebieg Webinar_RUI_2026-10-14.mp4 (1:58:43) zakończył się succeeded w 196,781 s. Profil WEBINAR_RUI_PL: large-v3/pl/cuda/float16/batch 8, alignment włączony, diarizacja wyłączona. Prompt terminologiczny przyjęty przez silnik i zapisany w run.json; profil niezmieniony.
 
@@ -14,6 +14,6 @@ D3 wywołano przez kontroler, bez obsługi widocznego GUI. RAM nie zmierzono; na
 
 D3: SHA-256 oryginału przed/po identyczne; 46565 plików źródła bez zmian ścieżek/rozmiarów/mtime_ns (nie pełny hash instalacji). Profil/local.toml bez zmian. D4 nie wykonywał zapisów w źródłowym WhisperX ani zmian kodu, konfiguracji, danych lub środowiska; bez transkrypcji, instalacji, pobierania i push. Nie powtarzano pełnego audytu integralności źródła.
 
-Start aplikacji: dwuklik Start.cmd; instrukcja i nowe stanowisko w [README](../README.md). Branch main; checkpoint D4 identyfikowany tytułem commita `Document D4 MVP review and closure recommendation`, SHA i status po commicie w odpowiedzi końcowej. Kolejny krok: decyzja użytkownika o formalnym zamknięciu, bez automatycznego dalszego rozwoju.
+Start aplikacji: dwuklik Start.cmd; wymagania obecnego stanowiska, odtworzenie konfiguracji i komponenty reuse w [README](../README.md). Branch main; wejściowy checkpoint D4: d85d5d5. Końcowy checkpoint zamknięcia identyfikuje tag `mvp-v1.0` po utworzeniu; SHA i status publikacji w raporcie końcowym. Brak zaległych zmian kodu na wejściu. Uzupełnienia dotyczą wyłącznie dokumentacji zamknięcia. Dalsze prace tylko na nowe zlecenie.
 
 [Historyczny raport D3](D3_PILOT_REPORT.md), [decyzje](DECISIONS.md), [checkpoint](../99_HANDOFF/CURRENT/HANDOFF.md), [D2.1](D2_1_TEST_REPORT.md), [D2](D2_TEST_REPORT.md).

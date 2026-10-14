@@ -1,6 +1,6 @@
 # D4 — ocena MVP, 14.10.2026
 
-**D4: COMPLETE wykonawczo, do odbioru. Formalne zamknięcie MVP oczekuje na decyzję użytkownika w głównej rozmowie ChatGPT.** D0, D1, D2 (po poprawce launchera Windows PowerShell), D2.1 i D3: APPROVED według zlecenia D4 z 14.10.2026. Kontrakt v1.0 pozostaje bez zmian.
+**MVP v1 CLOSED / D4 APPROVED — potwierdzone przez użytkownika 14.10.2026 w zleceniu końcowego przeglądu repozytorium.** Ocena pozostaje 6 PASS / 3 PARTIAL / 0 FAIL. Poniższa analiza i rekomendacja dokumentują historyczny stan wykonawczy D4 przed formalnym odbiorem; oczekiwanie na decyzję zostało zastąpione wpisem D-35 w [decyzjach](DECISIONS.md). Kontrakt v1.0 pozostaje bez zmian.
 
 ## Kryteria rozdziału 8 kontraktu
 
