@@ -1,0 +1,18 @@
+# Template only: copy to ignored config/local.toml and replace all placeholder paths.
+# No configuration loader exists in D1. Use absolute paths and TOML literal strings.
+schema_version = 1
+
+[runtime]
+python = 'C:\PATH\TO\WhisperX\.venv\Scripts\python.exe'
+ffmpeg = 'C:\PATH\TO\ffmpeg.exe'
+ffprobe = 'C:\PATH\TO\ffprobe.exe'
+hf_hub_cache = 'C:\PATH\TO\huggingface\hub'
+torch_home = 'C:\PATH\TO\torch'
+nltk_data = 'C:\PATH\TO\nltk_data'
+allow_downloads = false
+
+[paths]
+# input_dir is a file-picker starting directory, never a write destination.
+input_dir = 'C:\PATH\TO\recordings'
+# Must be separate from originals, models and the reference WhisperX directory.
+output_dir = 'C:\PATH\TO\WhisperX_GUI_results'

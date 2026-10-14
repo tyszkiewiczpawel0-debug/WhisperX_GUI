@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "id": "WEBINAR_RUI_PL",
+  "name": "Webinar — Rejestr Urbanistyczny PL",
+  "model": "large-v3",
+  "language": "pl",
+  "device": "cuda",
+  "compute_type": "float16",
+  "batch_size": 8,
+  "alignment": true,
+  "diarization": false
+}
