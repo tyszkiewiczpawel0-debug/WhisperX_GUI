@@ -1,11 +1,13 @@
-# Bieżący stan — 14.10.2026
+# Bieżący stan — 14.10.2026, po D2
 
-D0 formalnie zatwierdzony przez użytkownika 14.10.2026 (zlecenie D1). D1: inicjalizacja i dokumentacja przygotowane do odbioru; formalnego odbioru dokonuje użytkownik. D2 nie rozpoczęto. Aktualny stan Git i wyniki kontroli: [handoff](../99_HANDOFF/CURRENT/HANDOFF.md).
+**D2: COMPLETE w zakresie wykonawczym, do formalnego odbioru użytkownika. D0 i D1 zatwierdzone w zleceniu D2. D3 nie rozpoczęto.**
 
-Jedyny kontrakt: [PROJECT_CONTRACT.md](PROJECT_CONTRACT.md), v1.0 APPROVED, treść zachowana. Standard w katalogu głównym jest pomocniczy i niezmieniony. Raporty D0 zachowano jako historyczny zapis; wzmianki o oczekiwaniu na ocenę D0, braku Git w GUI i braku lokalnego standardu były prawdziwe w chwili discovery, nie opisują stanu po D1.
+Istnieje działające GUI Tkinter z wyborem nagrania, metadanymi, profilem, parametrami, przygotowaniem WAV, transkrypcją, alignmentem, etapami/logiem, anulowaniem i otwieraniem wyników. Silnik działa w osobnym procesie istniejącego środowiska. Każda operacja ma unikatowy katalog, manifest i log. Transkrypcja używa bibliotecznych eksporterów TXT/SRT/JSON.
 
-Istnieje: lokalny Git/main, reguły ignore, dokumentacja, wzór TOML, jeden profil JSON, miejsca przyszłego kodu i testów z opisem funkcji. Nie istnieje: GUI, parser konfiguracji aplikacji, kontroler, adapter, przygotowanie audio, testy wykonawcze aplikacji. Nie skonfigurowano remote i nie publikowano projektu.
+Potwierdzono: 11 testów logiki/integracji, rzeczywiste eksportery i przeniesienie znaczników minut/godzin, blokadę sieci i zapisów poza zadaniem, anulowanie potomnego FFmpeg oraz rzeczywistego ASR/alignmentu, responsywność Tkinter. Dwa pełne przebiegi 20 s PL na RTX 5070 Ti, large-v3/float16/batch 8, alignment PL: succeeded, 2 segmenty/58 słów. Ostatni 23,766 s; to pomiar próbki, nie benchmark.
 
-Zatwierdzone ustalenia D0: możliwość ponownego użycia istniejących zasobów, potrzeba adaptacji przepływu skryptu i dobudowania kontroli zadania. Parametry profilu są zgodne ze zleceniem D1, lecz batch 8 i pełny pipeline nie są potwierdzone. Szczegółowa architektura pozostaje rekomendacją opisaną w [ARCHITECTURE.md](ARCHITECTURE.md), nie istniejącym kodem.
+Ostrzeżenie TorchCodec pozostaje w logu/manifeście, lecz nie blokuje używanego dekodowania FFmpeg. Brak testu CPU/innych compute, długich nagrań, jakości i synchronizacji RUI oraz drugiego stanowiska. Ochrona offline obejmuje mechanizmy bibliotek i audit hook Python, nie systemowy firewall kodu natywnego.
 
-Ryzyka: CUDA/CTranslate2/offline nieprzetestowane; NLTK może pobierać dane; istniejący srt_ts ma błąd graniczny; pochodzenie starego WAV nieustalone; brak pilotażu RUI. Następny krok po odbiorze D1: autoryzacja D2 i rozstrzygnięcie polityki danych oraz testów opisanych w [DECISIONS.md](DECISIONS.md).
+Źródło bez zmian: porównanie ścieżka/rozmiar/mtime_ns wszystkich 46565 plików przed/po D2 identyczne. Kontrakt i standard mają pierwotne SHA256. Brak instalacji, pobierania, zmian źródła i push. Dane i lokalna konfiguracja są ignorowane. Wyniki szczegółowe: [raport](D2_TEST_REPORT.md), [handoff](../99_HANDOFF/CURRENT/HANDOFF.md).
+
+Start: dwuklik Start.cmd; lokalny TOML gotowy. Następny krok: użytkownik odbiera D2 i oddzielnie autoryzuje D3. Nie rozpoczęto pilotażu RUI ani nie uznano checkpointu za odbiór.

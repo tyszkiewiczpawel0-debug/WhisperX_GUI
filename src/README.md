@@ -1,3 +1,3 @@
-# Miejsce kodu aplikacji (D2)
+# Kod aplikacji
 
-D1 nie zawiera kodu wykonywalnego. Tutaj trafi minimalna implementacja GUI, kontrolera i adaptera po autoryzacji D2. Granice odpowiedzialności opisuje [architektura](../docs/ARCHITECTURE.md). Nie kopiować całego skryptu źródłowego ani pakietów WhisperX; adaptować tylko niezbędny przepływ API i opisać pochodzenie. Konfigurację czytać spoza logiki, z katalogu config. Nazwy modułów ustalić przy implementacji, bez tworzenia atrap w D1.
+Wejście: gui.py przez Start.cmd/Start.ps1, istniejącym skonfigurowanym Pythonem. Podział modułów: [architektura](../docs/ARCHITECTURE.md). Worker jest wewnętrznym procesem kontrolera, nie skryptem do ręcznego uruchamiania.

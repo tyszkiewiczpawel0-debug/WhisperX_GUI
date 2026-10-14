@@ -11,3 +11,21 @@
 | D-07 | Wykonawcza D1 | src i tests zawierają opis odpowiedzialności i plan kontroli; brak pustych modułów, klas i atrap. Manifest pakietów jest snapshotem, nie lockfile ani autoryzacją instalacji |
 
 Przed D2: użytkownik odbiera D1 i autoryzuje implementację, rozstrzyga proponowany wariant integracji, politykę pośrednich/próg długości oraz zakres dozwolonych testów wykonawczych. Nie wymagają ponownego rozstrzygania drobne decyzje organizacyjne już objęte D1. Brak modeli/zależności w późniejszej weryfikacji wymaga osobnej decyzji o instalacji/pobraniu, a nie automatycznej naprawy. D3 wymaga dostarczenia nagrania RUI i autoryzacji pilotażu.
+
+## D2 — autoryzacja i wykonanie 14.10.2026
+
+Powyższe wpisy D1 są historyczne. Zlecenie użytkownika „D2: IMPLEMENTACJA MVP — AUTHORIZED” potwierdziło odbiór D0/D1, architekturę oraz zgodę na implementację, krótkie testy i lokalne commity. Zastępuje wcześniejsze oczekiwanie na autoryzację D2; nie otwiera D3.
+
+| ID | Status | Decyzja / uzasadnienie |
+|---|---|---|
+| D-08 | Użytkownik D2 | Tkinter, istniejący Python w osobnym procesie, adapter API, FFprobe/FFmpeg i writery WhisperX; krótki test lokalny dozwolony |
+| D-09 | Wykonawcza D2 | Zachować wszystkie pośrednie także po sukcesie; prostsza diagnostyka, brak automatycznego usuwania danych |
+| D-10 | Użytkownik / wykonawcza D2 | Próg ostrzeżenia długości 0,1 s w TOML; odrzucać wiele ścieżek i offset >0,1 s, mniejsze offsety jawnie raportować |
+| D-11 | Wykonawcza D2 | Jedna konfiguracja profilu; model/język large-v3/pl, edytowalne urządzenie, compute, batch i alignment, bez cichego fallbacku |
+| D-12 | Wykonawcza D2 | Job Object z handshake przed pracą i kill-on-close; potwierdzono zabicie potomnego FFmpeg bez wpływu na niezależny proces |
+| D-13 | Wykonawcza D2 | Konkretne lokalne snapshoty, preflight NLTK/CUDA, HF offline, blokada nltk.download i audit hook; cache tymczasowe w katalogu zadania |
+| D-14 | Wykonawcza D2 | Nowy UUID dla każdej inspekcji/przygotowania/transkrypcji; pełna transkrypcja ponownie przygotowuje własny WAV z oryginału |
+| D-15 | Wykonawcza D2 | Lokalny output w ignorowanym runs/jobs, prywatny TOML; bez kopiowania środowiska/modeli i bez instalacji |
+| D-16 | Obserwacja D2 | TorchCodec ostrzega o niedostępnych DLL; używany pipeline FFmpeg + waveform działa. Nie zmieniamy środowiska na podstawie samego ostrzeżenia |
+
+D2 jest gotowy do odbioru na podstawie krótkiego testu. D3 wymaga osobnej autoryzacji i wskazania webinaru. Jakość mowy, synchronizacja początku/środka/końca oraz RAM/VRAM długiego materiału pozostają zadaniem pilotażu. Nie wyciągamy z 20 s wniosku o wydajności całego webinaru ani o wszystkich kombinacjach parametrów.

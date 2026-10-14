@@ -1,5 +1,5 @@
 # Template only: copy to ignored config/local.toml and replace all placeholder paths.
-# No configuration loader exists in D1. Use absolute paths and TOML literal strings.
+# Use absolute paths and TOML literal strings. Start.ps1 reads the python field.
 schema_version = 1
 
 [runtime]
@@ -16,3 +16,7 @@ allow_downloads = false
 input_dir = 'C:\PATH\TO\recordings'
 # Must be separate from originals, models and the reference WhisperX directory.
 output_dir = 'C:\PATH\TO\WhisperX_GUI_results'
+
+[processing]
+# Warning threshold, not a synchronization guarantee. Intermediates are retained.
+duration_warning_seconds = 0.1

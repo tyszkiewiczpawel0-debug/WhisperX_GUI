@@ -1,16 +1,18 @@
-# Dane i pochodzenie
+# Dane i pochodzenie — D2
 
-| Warstwa | Zawartość i lokalizacja | Ochrona |
+| Warstwa | Lokalizacja | Ochrona |
 |---|---|---|
-| SOURCE / RAW | Oryginalne nagranie wybrane przez użytkownika, poza Git | Tylko odczyt; bez nadpisania i bez obowiązkowej kopii dużego pliku |
-| DERIVED | Przygotowany WAV 16 kHz mono w przyszłym katalogu zadania | Powiązanie z oryginałem i poleceniem przygotowania w run.json |
-| WORKING | Dane częściowe w podkatalogu work zadania | Nie oznaczają sukcesu; brak automatycznego usuwania istniejących danych użytkownika |
-| OUTPUT | transcript.txt, transcript.srt, transcript.json, run.json, process.log | Osobny unikatowy katalog każdego uruchomienia, poza Git |
+| SOURCE | Wybrany oryginał | Tylko odczyt; ścieżka, rozmiar, mtime i metadane w manifeście |
+| DERIVED | UUID/work/audio.wav | PCM 16 kHz mono; polecenie i różnica długości w run.json |
+| WORKING | UUID/work/cache i work/export | Cache procesu i etap eksportu |
+| OUTPUT | UUID/transcript.txt, .srt, .json, run.json, process.log | Status succeeded dopiero po kontroli kompletu |
 
-W D1 nie utworzono katalogów nagrań/wyników ani nowych danych wykonawczych. Istniejące INPUT/OUTPUT w `C:\AI\WhisperX` pozostają nietykalne. Nie kopiujemy audio, modeli ani .venv do projektu. Preferencję standardu dotyczącą snapshotów realizujemy proporcjonalnie: bez powielania nagrania w D1; przyszłe metadane wejścia i pochodzenia zabezpieczają identyfikację, a ewentualny hash wejścia jest decyzją implementacji.
+Każda operacja tworzy nowy katalog data/czas + UUID, również inspekcja i przygotowanie. Walidacja odrzuca nakładanie output z projektem interpretera, input_dir i katalogami zasobów; rozwiązuje ścieżki przed porównaniem. Plik wejściowy nie może należeć do bazy wyników.
 
-Plan provenance: wynik → wersja aplikacji/pakietów i parametry efektywne → wejście (ścieżka, rozmiar, mtime, wybrany strumień, właściwości), wersje modeli, przygotowanie, różnica długości i ostrzeżenia. run.json ma też status, czasy, etap błędu/anulowania. Istniejące wyniki D0 nie mają takiego manifestu i nie dowodzą działania nowej aplikacji.
+run.json: identyfikator, status/etap, źródło, parametry, modele/revizje, wersje, GPU, hashe kodu, czas UTC i czas wykonania, rezultaty, błędy/ostrzeżenia. request.json zawiera tylko dozwolone pola konfiguracji. Nie zapisujemy tokenów ani całego środowiska. Log i metadane są prywatnymi danymi poza Git.
 
-Decyzje otwarte: lokalizacja output na stanowisku, retencja pośrednich po sukcesie/błędzie, próg różnicy długości (D0 proponuje 0.1 s), obsługa nietypowych offsetów/wielu strumieni. Do ich rozstrzygnięcia nie uruchamiać automatycznego sprzątania. Model/cache/NLTK pozostają zasobami środowiska, nie danymi repozytorium.
+Zachowujemy pośrednie po sukcesie, błędzie i anulowaniu. Aplikacja nie usuwa istniejących plików. Awaria całego GUI/systemu może pozostawić running; ponowienie tworzy nowe zadanie bez automatycznej naprawy. TXT/SRT przy failed/cancelled nie oznaczają sukcesu.
 
-W Git są dokumenty, wzór konfiguracji i profil bez sekretów. Prywatny TOML, .env, media, wyniki, wagi i logi są ignorowane. Reguły ignore nie potrafią rozpoznać dowolnego sekretu w dowolnym pliku: przed commitem przegląd zawartości i listy plików jest obowiązkowy. Nie używać `git add -f` dla danych lokalnych.
+Próg różnicy długości 0,1 s jest konfigurowalnym założeniem. Brak audio, wiele ścieżek i offset ponad 0,1 s są odrzucane. Drobny offset jest raportowany; napisy względem początku dekodowanego audio. Przy braku długości ścieżki używana jest długość kontenera jako przybliżenie. Brak obu uniemożliwia porównanie. Bez korekty ciszy, tempa i osi czasu.
+
+D2 użył syntetycznych WAV/MKV oraz wycinka 30–50 s istniejącego źródłowego WAV, zapisanego w runs/d2_checks. To nie webinar RUI. W Git są tylko kod, konfiguracja przykładowa/profil, testy i dokumenty; źródło, środowisko i modele pozostają tylko do odczytu.
