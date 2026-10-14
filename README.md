@@ -14,6 +14,8 @@ Lokalne GUI Tkinter do przygotowania i transkrypcji pojedynczego nagrania. Jeden
 
 Lokalną konfigurację przygotowano w D2. Wyniki są w `runs/jobs/`, poza Git; dane testowe w innych podkatalogach `runs/`. Alternatywa: uruchom `Start.ps1` z PowerShell albo skonfigurowanym Pythonem `-B src/gui.py`. Nie uruchamiaj ani nie importuj źródłowego transcribe_trip_meeting.py.
 
+Launcher korzysta jawnie z systemowego Windows PowerShell 5.1. Start.ps1 ma treść ASCII, a local.toml jest czytany jako UTF-8 (również ścieżki z polskimi znakami). Przy braku lub błędnej konfiguracji komunikat pozostaje w oknie konsoli do naciśnięcia klawisza; popraw wskazany plik według wzoru. Nie jest potrzebna instalacja PowerShell 7 ani zmiana globalnej polityki Windows.
+
 ## Wyniki i ograniczenia
 
 Udana transkrypcja zawiera transcript.txt, transcript.srt, transcript.json, run.json i process.log. Manifest opisuje źródło, parametry, modele/revizje, wersje, czasy, ostrzeżenia i hashe kodu. request.json i work/ służą diagnostyce. Wszystkie pliki pośrednie pozostają również po sukcesie; nie ma automatycznego sprzątania.

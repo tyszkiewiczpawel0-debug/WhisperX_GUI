@@ -29,3 +29,9 @@ Powyższe wpisy D1 są historyczne. Zlecenie użytkownika „D2: IMPLEMENTACJA M
 | D-16 | Obserwacja D2 | TorchCodec ostrzega o niedostępnych DLL; używany pipeline FFmpeg + waveform działa. Nie zmieniamy środowiska na podstawie samego ostrzeżenia |
 
 D2 jest gotowy do odbioru na podstawie krótkiego testu. D3 wymaga osobnej autoryzacji i wskazania webinaru. Jakość mowy, synchronizacja początku/środka/końca oraz RAM/VRAM długiego materiału pozostają zadaniem pilotażu. Nie wyciągamy z 20 s wniosku o wydajności całego webinaru ani o wszystkich kombinacjach parametrów.
+
+## Poprawka launchera D2 — 14.10.2026
+
+D-17 (wykonawcza, autoryzowana poprawka D2): Start.ps1 pozostaje ASCII, zgodne zarówno z Windows PowerShell 5.1, jak i PS7 bez zależności od BOM. Konfigurację czytamy jawnie jako UTF-8; Start.cmd wskazuje systemowy Windows PowerShell 5.1. Bez instalacji PS7 i zmian globalnych Windows. Rzeczywistym źródłem zgłoszonego błędu było odczytanie UTF-8 jako CP1250; wcześniejszy test PS7 nie pokrywał launchera.
+
+D-18: Błędy konfiguracji przed otwarciem GUI trafiają do konsoli zachowanej przez pause; kod 1 przechodzi przez Python, PowerShell i CMD. Unikamy startowego modalu z ukrytym rodzicem, który w teście nie był widoczny. Błędy podczas pracy GUI pozostają bez zmian. Testy launchera nie uruchamiają silnika; wadliwe konfiguracje znajdują się w osobnych katalogach i nie zastępują local.toml użytkownika. Nie rozpoczynamy D2.1/D3.

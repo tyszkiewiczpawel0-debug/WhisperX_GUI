@@ -2,6 +2,23 @@
 
 Status wykonawczy: COMPLETE, do odbioru użytkownika. Testy nie stanowią pilotażu RUI.
 
+## Poprawka pierwszego uruchomienia — 14.10.2026
+
+Zgłoszony przez użytkownika FAIL odtworzono: Start.ps1:3 char:64, Unexpected token 'nij'. Plik miał UTF-8 bez BOM; Start.cmd wywoływał powershell.exe, czyli systemowy Windows PowerShell **5.1.26100.9711**, z domyślną stroną kodową **1250**. Bajty UTF-8 litery ł (C5 82) zostały odczytane jako Ĺ oraz znak U+201A rozpoznawany przez parser jako cudzysłów. Wcześniejsza kontrola składni była wykonana w PowerShell **7.6.5**, a test Tkinter omijał launcher. Jej PASS nie dowodził poprawnego pierwszego uruchomienia przez Start.cmd.
+
+Poprawka: bootstrap ASCII, jawne czytanie konfiguracji UTF-8, systemowy pełny adres powershell.exe, kontrola obecności TOML/pola python/interpretera, zachowanie kodu wyjścia także po pause. Startowy błąd loadera GUI jest wypisywany do konsoli i zwraca 1. Konsola pozostaje otwarta. Nie zmieniono silnika, środowiska ani konfiguracji użytkownika.
+
+Testowana była rzeczywista ścieżka cmd.exe /c Start.cmd → Windows PowerShell 5.1 → skonfigurowany Python → niezmokowane GUI, również z innym katalogiem roboczym. Potwierdzono widoczne okno przez computer-use, bez uruchamiania transkrypcji; zamknięcie okna daje kod 0. Nie wykonano gestu dwukliku w Explorerze — uruchomiono tę samą ścieżkę CMD programowo. Końcowy ręczny odbiór użytkownika pozostaje wymagany.
+
+| Test | Wynik | Dowód w ignorowanym runs/ |
+|---|---|---|
+| Produkcyjny launcher, rzeczywiste GUI i zamknięcie | PASS, kod 0 | launcher_f001eea7bdce48b986856a9b98e4a2cc/results.json |
+| Brak TOML / błędne pole python / brak interpretera | PASS, 3 czytelne komunikaty, kod 1 | launcher_fa398d0b27f04d26b5ccfbcabd5f9005/results.json |
+| Niepoprawna składnia TOML po korekcie obsługi błędu | PASS, komunikat i wskazanie local.toml, kod 1 | launcher_32de8942a9f743f4a6382218a173df02/results.json |
+| Katalog ze spacjami i polskimi znakami | PASS, widoczne GUI i kod 0 | launcher_9914621a437c48f19aa2d0a12133b3eb/results.json |
+
+Pierwszy test niepoprawnego TOML z poprzednim modalnym komunikatem przekroczył 120 s; nie znaleziono targetowalnego okna komunikatu. Po zmianie na trwały komunikat konsoli test przeszedł. Kontrola procesów po timeout nie wykazała pozostałych procesów tego katalogu testowego. Test regresji: tests/check_launcher.py; błędne przypadki na wydzielonych kopiach, porównanie hasha local.toml przed/po. Nie nadpisywano konfiguracji użytkownika. Nie wykonywano ponownie GPU ani testów silnika. Poniższe wyniki są historycznym zapisem implementacji D2 sprzed poprawki launchera.
+
 ## PASS
 
 - `tests/test_mvp.py`: 11 testów, ostatnie wykonanie 2,117 s. Konfiguracja i parametry, brak modeli, brak/wiele ścieżek, offsety (walidacja metadanych), znaczniki poza zakresem, uszkodzone wejście, rzeczywiste WAV i MKV, konwersja PCM/16 kHz/mono, ostrzeżenie różnicy długości, ponowienie bez nadpisania i niezmienność wejścia, natychmiastowe anulowanie.

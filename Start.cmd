@@ -1,3 +1,6 @@
 @echo off
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Start.ps1"
-if errorlevel 1 pause
+setlocal
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%~dp0Start.ps1"
+set "launcherExit=%errorlevel%"
+if not "%launcherExit%"=="0" pause
+exit /b %launcherExit%

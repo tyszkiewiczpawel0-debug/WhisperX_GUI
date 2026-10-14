@@ -4,6 +4,18 @@ Data: 14.10.2026. Odbiorca: główna rozmowa WHISPERX_GUI, za pośrednictwem uż
 
 **D2: COMPLETE wykonawczo, do formalnego odbioru. D0/D1 zatwierdzone zleceniem D2. D3 nie rozpoczęto.**
 
+## Aktualizacja — poprawka pierwszego uruchomienia D2
+
+14.10.2026: naprawiono zgłoszony ParserError. Potwierdzona przyczyna: Start.ps1 UTF-8 bez BOM był interpretowany jako CP1250 przez Windows PowerShell 5.1.26100.9711; poprzednia kontrola składni używała PS7.6.5. Treść launchera jest teraz ASCII, TOML odczytywany jawnie jako UTF-8. Start.cmd wskazuje systemowy PowerShell, zachowuje kod błędu i otwarte okno konsoli. Błędy loadera GUI przy starcie są wypisywane do konsoli z kodem 1 zamiast niewidocznego w teście modalu.
+
+PASS: rzeczywiste Start.cmd → Start.ps1 → Python → widoczne GUI, zamknięcie z kodem 0; katalog z polskimi znakami/spacjami; brak TOML, błędne pole python, nieistniejący interpreter i uszkodzona składnia TOML (czytelne komunikaty, kod 1). Test wykonywał cmd.exe /c, bez atrap GUI; gest dwukliku pozostaje do ręcznego odbioru. Początkowy test modalu dla uszkodzonego TOML przekroczył timeout; po poprawce komunikacji test przeszedł. [Raport i dowody](../../docs/D2_TEST_REPORT.md), test regresji tests/check_launcher.py.
+
+Nie zmieniono silnika, źródłowego WhisperX, środowiska Python ani konfiguracji użytkownika; brak instalacji i pobrań. GPU nie testowano ponownie. Start użytkownika: dwuklik Start.cmd; przy błędzie przeczytaj zachowany komunikat konsoli i popraw local.toml według README.
+
+Branch main. Bazowy checkpoint D2: 97b371c658c3133eb1a6307e6d8a0febf97edf38. Niniejsza poprawka ma osobny lokalny commit „Fix Windows PowerShell launcher encoding and startup errors”; jego SHA jest HEAD po zakończeniu poprawki i zostaje podane w odpowiedzi. Status/branch sprawdzane po commicie, bez push. Poniższe informacje o wcześniejszych commitach i testach opisują pierwotną implementację D2.
+
+Poprawka zakończona, do odbioru D2. Nie rozpoczęto D2.1 ani D3.
+
 ## Funkcje i ponowne wykorzystanie
 
 GUI Tkinter: pojedyncze audio/wideo, metadane, jeden profil z pliku, parametry urządzenia/compute/batch/alignment, osobne sprawdzenie i przygotowanie WAV, pełna transkrypcja, status/log, anulowanie i otwarcie wyników. Model large-v3 i język pl pozostają stałe dla jedynego profilu.

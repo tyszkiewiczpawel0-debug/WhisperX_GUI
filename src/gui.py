@@ -1,5 +1,6 @@
 """Tk runs only on the main thread; engine output arrives through a queue."""
 import os
+import sys
 import queue
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -161,12 +162,14 @@ def main():
     try:
         App(root, load())
     except Exception as exc:
-        root.withdraw()
-        messagebox.showerror('Konfiguracja WhisperX', f'{exc}\n\nUzupełnij config/local.toml według README.')
         root.destroy()
-        return
+        # The launcher retains its console on failure. Avoid a modal owned by
+        # a withdrawn root, which can be invisible during Windows startup.
+        print(f'Blad konfiguracji WhisperX: {exc}\n'
+              'Popraw config/local.toml wedlug README.', file=sys.stderr)
+        return 1
     root.mainloop()
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
