@@ -53,3 +53,14 @@ Powyższe stany są historyczne. Zlecenie użytkownika „D2.1: INITIAL PROMPT �
 - D-26 (obserwacja): ostatni segment/słowo 23,688 ms poza WAV, w istniejącej tolerancji 100 ms; wyniki zachowano bez przycinania. Struktura i wzajemna zgodność eksportów potwierdzone, ścisła granica audio nie jest PASS.
 - D-27 (ograniczenie): D3 PARTIAL z powodu niewykonanej kontroli akustycznej. Przegląd tekstu i timestampów nie zastępuje odsłuchu ani oceny kompletności. Podejrzane fragmenty początku, przerwy i zakończenie wskazano w raporcie do odsłuchu. Nie testowano widocznego GUI podczas pełnego przebiegu D3; RAM niedostępny, VRAM tylko punktowo dla całej karty.
 - D-28 (bramka): raport i jeden bieżący handoff do oceny użytkownika; D4 nie rozpoczęto. Nie przyjmujemy własnego sukcesu technicznego jako odbioru jakości lub MVP.
+
+## D4 — autoryzacja, odbiór D3 i rekomendacja 14.10.2026
+
+Wpisy D-24–D-28 i raport D3 opisują stan historyczny przed kontrolą użytkownika. Poniższe decyzje zastępują ówczesne oczekiwanie na odsłuch i autoryzację D4.
+
+- D-29 (użytkownik, zlecenie D4): D0, D1, D2 po poprawce launchera Windows PowerShell, D2.1 i D3 APPROVED; D4 AUTHORIZED wyłącznie jako ocena, dokumentacja i lokalny commit. Bez zmian implementacji, środowiska, kontraktu lub standardu i bez nowej transkrypcji.
+- D-30 (użytkownik): odsłuch 06:20–07:20, 58:00–59:00 i 1:42:00–1:43:00 potwierdził akceptowalną treść, kompletność i synchronizację tych fragmentów; D3 APPROVED. Pierwotne PARTIAL Work pozostaje historycznym faktem. Nie zweryfikowano wszystkich 11903 słów.
+- D-31 (obserwacje użytkownika): cisza/szumy 01:30–03:40 i pożegnania z wysokim prawdopodobieństwem będące halucynacjami; słyszalne echo, podejrzenie aktywnego mikrofonu laptopa bez potwierdzenia przyczyny. Ograniczenia nie zablokowały odbioru; oryginalne wyniki pozostają bez zmian.
+- D-32 (ocena wykonawcza D4): dziewięć kryteriów kontraktu: 6 PASS, 3 PARTIAL, 0 FAIL. Niepełne dowody pełnego przebiegu przez widoczne GUI, responsywności podczas silnika i przeniesienia na inne stanowisko. Szczegóły i granice PASS: [raport D4](D4_MVP_REVIEW.md).
+- D-33 (rekomendacja, nie decyzja użytkownika): zamknąć MVP dla sprawdzonego stanowiska/profilu przy świadomej akceptacji trzech PARTIAL; w razie wymogu pełnego wykonawczego PASS pozostawić zamknięcie otwarte do osobno zleconej weryfikacji. Nie zmienia to kontraktu. Formalna decyzja wyłącznie w głównej rozmowie ChatGPT.
+- D-34 (wykonawcza D4): jeden raport D4 i jeden bieżący handoff; historyczne raporty zachowane, ARCHITECTURE/DATA aktualne bez potrzeby zmiany. Propozycje rozwoju nie stanowią autoryzacji ani standardu Ekosystemu. D4 COMPLETE wykonawczo; po lokalnym commicie zakończyć pracę.

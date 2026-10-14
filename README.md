@@ -2,7 +2,7 @@
 
 Lokalne GUI Tkinter do przygotowania i transkrypcji pojedynczego nagrania. Jeden profil WEBINAR_RUI_PL, bez diarizacji, streszczeń i kolejki.
 
-**D0–D2.1 zatwierdzone. D3: PARTIAL — pełny pilotaż succeeded, odsłuch NOT VERIFIED; D4 nie rozpoczęto.** [Raport D3](docs/D3_PILOT_REPORT.md). Dowody: [raport D2.1](docs/D2_1_TEST_REPORT.md), [raport D2](docs/D2_TEST_REPORT.md), [stan](docs/CURRENT_STATE.md), [handoff](99_HANDOFF/CURRENT/HANDOFF.md).
+**D0–D3: APPROVED. D4: COMPLETE wykonawczo — formalne zamknięcie MVP oczekuje na decyzję użytkownika.** [Ocena MVP: 6 PASS, 3 PARTIAL, 0 FAIL](docs/D4_MVP_REVIEW.md). [Raport D3](docs/D3_PILOT_REPORT.md). Dowody: [raport D2.1](docs/D2_1_TEST_REPORT.md), [raport D2](docs/D2_TEST_REPORT.md), [stan](docs/CURRENT_STATE.md), [handoff](99_HANDOFF/CURRENT/HANDOFF.md).
 
 ## Pierwsze uruchomienie
 
@@ -26,7 +26,7 @@ Model large-v3 i język pl są stałe dla jedynego profilu. Można zmieniać urz
 
 Opcjonalne pole JSON `initial_prompt` przyjmuje tekst albo null. Brak pola, null, pusty tekst lub same białe znaki oznaczają brak promptu. Dostarczony profil ma pustą wartość. Niepusty tekst jest przekazywany bez zmian i zapisywany w metadanych; biblioteka usuwa skrajne białe znaki przed tokenizacją i wykorzystuje najwyżej ostatnie 223 tokeny promptu. Stosuj krótki kontekst lub terminologię; prompt nie gwarantuje poprawnej transkrypcji. Szczegóły zapisu przy błędzie/anulowaniu: [dane](docs/DATA.md).
 
-Brak lokalnych modeli, NLTK lub CUDA kończy zadanie czytelnym błędem. Pobieranie i automatyczne naprawy są wyłączone. Obecne ostrzeżenie TorchCodec nie zablokowało ścieżki FFmpeg → audio w pamięci. Długie nagrania są wczytywane do RAM; test 20 s nie potwierdza wydajności ani jakości pełnego webinaru.
+Brak lokalnych modeli, NLTK lub CUDA kończy zadanie czytelnym błędem. Pobieranie i automatyczne naprawy są wyłączone. Obecne ostrzeżenie TorchCodec nie zablokowało ścieżki FFmpeg → audio w pamięci. Długie nagrania są wczytywane do RAM. Pilotaż D3: webinar 1:58:43 przetworzony w 196,781 s; nie jest to benchmark ani gwarancja dla innych materiałów. RAM i szczyt VRAM nie zostały zmierzone. Użytkownik zaakceptował treść, kompletność i synchronizację w trzech odsłuchanych fragmentach; nie sprawdzono wszystkich 11903 słów. Cisza/szumy 01:30–03:40 prawdopodobnie wywołały halucynacyjne pożegnania; słychać echo o niepotwierdzonej przyczynie. Możliwe błędy terminologiczne wymagają kontroli. Końcowy znacznik jest 23,688 ms poza WAV, w tolerancji aplikacji 100 ms. Szczegóły i luki dowodowe GUI/drugiego stanowiska: [ocena D4](docs/D4_MVP_REVIEW.md).
 
 ## Nowe stanowisko
 
@@ -44,4 +44,4 @@ Brak lokalnych modeli, NLTK lub CUDA kończy zadanie czytelnym błędem. Pobiera
 - Historyczne D0: [discovery](DISCOVERY_REPORT.md), [reuse](REUSE_MATRIX.md), [rekomendacja](MVP_RECOMMENDATION.md).
 - [Konfiguracja](config/local.example.toml), [profil](config/WEBINAR_RUI_PL.json), [moduły](src/README.md), [testy](tests/README.md).
 
-Ocena D3, odsłuch wskazanych fragmentów oraz decyzja o dalszym etapie należą do użytkownika.
+D3 zatwierdzono po dodatkowym odsłuchu użytkownika 14.10.2026. Pierwotny raport D3 zachowuje historyczny status PARTIAL. Formalne zamknięcie MVP należy do użytkownika w głównej rozmowie ChatGPT; dalszy rozwój wymaga osobnego zlecenia.
