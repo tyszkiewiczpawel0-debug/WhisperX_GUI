@@ -1,15 +1,17 @@
-# Bieżący stan — 14.10.2026, po D2
+# Bieżący stan — 14.10.2026, po D2.1
 
-**D2: COMPLETE w zakresie wykonawczym, do formalnego odbioru użytkownika. D0 i D1 zatwierdzone w zleceniu D2. D3 nie rozpoczęto.**
+**D2.1: COMPLETE wykonawczo, do odbioru użytkownika. D2 formalnie zatwierdzony w zleceniu D2.1. D3 nie rozpoczęto i wymaga odrębnej autoryzacji.**
 
-Poprawka pierwszego uruchomienia (14.10.2026): odtworzono ParserError wynikający z UTF-8 bez BOM czytanego przez Windows PowerShell 5.1/CP1250. Launcher jest teraz ASCII, konfiguracja jawnie UTF-8, błędy startu pozostają w konsoli z kodem 1. Rzeczywista ścieżka Start.cmd → Start.ps1 → GUI przeszła test z wizualnym sprawdzeniem okna i zamknięciem (kod 0), podobnie ścieżka z polskimi znakami/spacjami. Brak/błędy konfiguracji i brak interpretera — PASS. Poprawka gotowa do ponownego odbioru D2; nie rozpoczęto D2.1 ani D3. Silnika i środowiska nie zmieniano, testów GPU nie powtarzano. Szczegóły w początkowej sekcji raportu testów.
+MVP obsługuje opcjonalny initial_prompt z profilu JSON, edytowalny w wielowierszowym polu GUI dla uruchomienia. Profil pozostaje niezmieniony; dostarczona wartość jest pusta. Brak/null/pusty tekst/białe znaki oznaczają brak promptu. Pozostały tekst przechodzi bez zmian przez kontroler i adapter do load_model/asr_options lokalnego WhisperX 3.8.6.
 
-Istnieje działające GUI Tkinter z wyborem nagrania, metadanymi, profilem, parametrami, przygotowaniem WAV, transkrypcją, alignmentem, etapami/logiem, anulowaniem i otwieraniem wyników. Silnik działa w osobnym procesie istniejącego środowiska. Każda operacja ma unikatowy katalog, manifest i log. Transkrypcja używa bibliotecznych eksporterów TXT/SRT/JSON.
+run.json odróżnia konfigurację (parameters.initial_prompt) od wartości potwierdzonej po load_model (initial_prompt + initial_prompt_state). Błąd/anulowanie przed ASR nie deklaruje użycia promptu; przerwanie ładowania pozostawia submission_unconfirmed. Nie dopisujemy pełnego promptu do process.log. Pozostałe parametry i architektura D2 zachowane.
 
-Potwierdzono: 11 testów logiki/integracji, rzeczywiste eksportery i przeniesienie znaczników minut/godzin, blokadę sieci i zapisów poza zadaniem, anulowanie potomnego FFmpeg oraz rzeczywistego ASR/alignmentu, responsywność Tkinter. Dwa pełne przebiegi 20 s PL na RTX 5070 Ti, large-v3/float16/batch 8, alignment PL: succeeded, 2 segmenty/58 słów. Ostatni 23,766 s; to pomiar próbki, nie benchmark.
+Weryfikacja: 16/16 testów PASS (11 D2 + 5 ukierunkowanych z podprzypadkami), rzeczywisty widget Tkinter i niezmienność profilu, błędy/anulowanie, dokładne przekazanie i JSON. Jeden pełny przebieg lokalnej próbki D2 20 s z promptem: succeeded, 6 segmentów, 25,047 s, komplet wyników. Składnia Python i granice układu widocznego GUI 940x810/760x680 — PASS. Launchery niezmienione; wcześniejsze testy uruchomienia opisano w raporcie D2.
 
-Ostrzeżenie TorchCodec pozostaje w logu/manifeście, lecz nie blokuje używanego dekodowania FFmpeg. Brak testu CPU/innych compute, długich nagrań, jakości i synchronizacji RUI oraz drugiego stanowiska. Ochrona offline obejmuje mechanizmy bibliotek i audit hook Python, nie systemowy firewall kodu natywnego.
+Ochrona źródła: przed/po identyczne ścieżki, rozmiary i mtime_ns wszystkich 46565 plików C:\AI\WhisperX. SHA256 próbki również identyczne. Nie jest to pełne hashowanie instalacji. Bez zmian środowiska, instalacji, pobierania, nadpisywania wcześniejszych wyników i push. Dane testowe oraz lokalny TOML poza Git.
 
-Źródło bez zmian: porównanie ścieżka/rozmiar/mtime_ns wszystkich 46565 plików przed/po D2 identyczne. Kontrakt i standard mają pierwotne SHA256. Brak instalacji, pobierania, zmian źródła i push. Dane i lokalna konfiguracja są ignorowane. Wyniki szczegółowe: [raport](D2_TEST_REPORT.md), [handoff](../99_HANDOFF/CURRENT/HANDOFF.md).
+Ograniczenia: nie oceniano jakości terminologii RUI, pełnego webinaru, CPU/innych compute ani długiego materiału. Nie powtarzano macierzy kosztownych testów GPU. Ostrzeżenie TorchCodec nadal nie blokuje używanego dekodowania. Ręczny odbiór wyglądu należy do użytkownika.
 
-Start: dwuklik Start.cmd; lokalny TOML gotowy. Następny krok: użytkownik odbiera D2 i oddzielnie autoryzuje D3. Nie rozpoczęto pilotażu RUI ani nie uznano checkpointu za odbiór.
+Start: dwuklik Start.cmd. Kolejny krok: odbiór D2.1 i osobna autoryzacja D3 ze wskazaniem webinaru oraz ewentualnego promptu terminologicznego. Gotowość techniczna do takiego pilotażu, bez samodzielnego jego rozpoczęcia.
+
+[Raport D2.1](D2_1_TEST_REPORT.md), [raport D2](D2_TEST_REPORT.md), [decyzje](DECISIONS.md), [checkpoint](../99_HANDOFF/CURRENT/HANDOFF.md).

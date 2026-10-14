@@ -23,6 +23,10 @@ def parameters(value):
         raise ValueError('Batch size musi być liczbą całkowitą 1–64.')
     if type(p.get('alignment')) is not bool or p.get('diarization') is not False:
         raise ValueError('Alignment musi być bool; diarizacja pozostaje wyłączona.')
+    prompt = p.get('initial_prompt')
+    if prompt is not None and not isinstance(prompt, str):
+        raise ValueError('Prompt transkrypcji musi być tekstem albo null.')
+    p['initial_prompt'] = prompt if prompt and prompt.strip() else None
     return p
 
 

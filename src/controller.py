@@ -49,7 +49,8 @@ class Controller:
             manifest = {'schema_version': 1, 'id': ident, 'status': 'running', 'stage': 'starting',
                         'mode': mode, 'started_at': datetime.now(timezone.utc).isoformat(),
                         'parameters': p, 'warnings': [], 'error': None, 'output_dir': str(run),
-                        'source': {'path': str(source)}, 'application': 'WHISPERX_GUI D2',
+                        'source': {'path': str(source)}, 'application': 'WHISPERX_GUI D2.1',
+                        'initial_prompt': None, 'initial_prompt_state': 'not_submitted',
                         'code_sha256': {f.name: hashlib.sha256(f.read_bytes()).hexdigest()
                                         for f in sorted((ROOT / 'src').glob('*.py'))},
                         'duration_warning_seconds': self.config['processing']['duration_warning_seconds'],

@@ -35,6 +35,13 @@ def main():
 
     def stage(name):
         manifest['stage'] = name
+        # Persist before loading; a kill/error here cannot confirm acceptance.
+        if name == 'asr_loading':
+            manifest['initial_prompt_state'] = 'submission_unconfirmed'
+        elif name == 'asr':
+            # load_model returned successfully with the configured ASR options.
+            manifest['initial_prompt'] = p['initial_prompt']
+            manifest['initial_prompt_state'] = 'accepted_by_engine'
         save(run / 'run.json', manifest)
         print('@stage ' + name, flush=True)
 

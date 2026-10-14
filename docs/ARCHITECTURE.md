@@ -21,3 +21,9 @@ REUSE: Tkinter, Python/stos, FFprobe/FFmpeg, WhisperX/faster-whisper/CTranslate2
 Preflight sprawdza lokalny snapshot refs/main i wymagane pliki, NLTK PL, CUDA i wspierany typ obliczeń. Adapter przekazuje lokalne ścieżki modeli i local_files_only/model_cache_only. nltk.download jest blokowany, HF offline i wyłączenie telemetryki aktywne przed importem silnika. Cache TEMP/CUDA/MPL/Numba trafiają do work/cache. Audit hook stanowi ochronę dla operacji Python, nie systemowy sandbox bibliotek natywnych; krótki przebieg przeszedł z aktywną ochroną.
 
 Eksport powstaje w work/export, jest walidowany i przenoszony do nazw końcowych. succeeded wymaga kompletu pięciu plików. Zestaw nie jest jedną transakcją; po przerwaniu częściowe wyniki nie oznaczają sukcesu. Rozstrzyga run.json. Brak wznawiania i sprzątania.
+
+## D2.1 — opcjonalny prompt
+
+JSON `initial_prompt` → wielowierszowy widget Tkinter → kopia parametrów w kontrolerze/request.json → worker → `whisperx.load_model(asr_options={'initial_prompt': ...})`. Pole nie jest argumentem `model.transcribe`. Brak/null/pusty tekst/białe znaki normalizujemy do None; pozostały tekst zachowujemy dokładnie. Edycja nie zapisuje profilu. Inne parametry i etapy pozostają bez zmian.
+
+WhisperX 3.8.6 scala asr_options z domyślnymi opcjami; jego batched ASR oczekuje str/None, mimo szerszego typu w faster-whisper. Biblioteka tokenizuje spację + strip tekstu, stosuje ten sam prompt w batchu; get_prompt z faster-whisper 1.2.1 ogranicza poprzedni kontekst do ostatnich 223 tokenów (max_length=448). Nie implementujemy własnego tokenizera ani limitu znaków. Stan przyjęcia opcji jest utrwalany przed transkrypcją; [semantyka metadanych](DATA.md).

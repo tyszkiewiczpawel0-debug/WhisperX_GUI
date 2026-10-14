@@ -8,5 +8,6 @@
   "compute_type": "float16",
   "batch_size": 8,
   "alignment": true,
-  "diarization": false
+  "diarization": false,
+  "initial_prompt": ""
 }

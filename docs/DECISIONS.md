@@ -35,3 +35,13 @@ D2 jest gotowy do odbioru na podstawie krótkiego testu. D3 wymaga osobnej autor
 D-17 (wykonawcza, autoryzowana poprawka D2): Start.ps1 pozostaje ASCII, zgodne zarówno z Windows PowerShell 5.1, jak i PS7 bez zależności od BOM. Konfigurację czytamy jawnie jako UTF-8; Start.cmd wskazuje systemowy Windows PowerShell 5.1. Bez instalacji PS7 i zmian globalnych Windows. Rzeczywistym źródłem zgłoszonego błędu było odczytanie UTF-8 jako CP1250; wcześniejszy test PS7 nie pokrywał launchera.
 
 D-18: Błędy konfiguracji przed otwarciem GUI trafiają do konsoli zachowanej przez pause; kod 1 przechodzi przez Python, PowerShell i CMD. Unikamy startowego modalu z ukrytym rodzicem, który w teście nie był widoczny. Błędy podczas pracy GUI pozostają bez zmian. Testy launchera nie uruchamiają silnika; wadliwe konfiguracje znajdują się w osobnych katalogach i nie zastępują local.toml użytkownika. Nie rozpoczynamy D2.1/D3.
+
+## D2.1 — autoryzacja i wykonanie 14.10.2026
+
+Powyższe stany są historyczne. Zlecenie użytkownika „D2.1: INITIAL PROMPT — AUTHORIZED” formalnie zatwierdza D2 i autoryzuje implementację promptu, proporcjonalne testy oraz lokalne commity. D3 nadal wymaga odrębnej zgody.
+
+- D-19 (użytkownik): opcjonalny initial_prompt w profilu, edycja tylko dla uruchomienia, bez zarządzania promptami i zmiany innych parametrów.
+- D-20 (wykonawcza, potwierdzone lokalne API): przekazanie przez load_model/asr_options; str/None, bez list tokenów i zastępowania mechanizmem hotwords. Profil pozostaje schema_version=1, pole opcjonalne, dostarczona wartość pusta.
+- D-21 (wykonawcza): brak/null/pusty/białe znaki → None; pozostały tekst zachowany dokładnie. Nie przycinamy tekstu w GUI ani adapterze; biblioteczna tokenizacja ma własne ograniczenie kontekstu.
+- D-22 (wykonawcza): oddzielić parameters.initial_prompt od głównego initial_prompt i stanu not_submitted/submission_unconfirmed/accepted_by_engine. Nie deklarować przyjęcia opcji po nieudanym ładowaniu; anulowanie zachowuje ostatni trwały stan. Bez pełnego promptu w logach aplikacji.
+- D-23 (weryfikacja): ukierunkowane testy plus pojedynczy przebieg lokalnej próbki D2 z promptem; bez pełnego webinaru, powtarzania macierzy GPU i zmian środowiska. Odbiór D2.1 należy do użytkownika.

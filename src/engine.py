@@ -67,7 +67,8 @@ def transcribe(c, p, wav, resources, stage):
         stage('asr_loading')
         model = whisperx.load_model(resources['models']['asr']['path'], p['device'],
                                     compute_type=p['compute_type'], language=p['language'],
-                                    local_files_only=True, vad_method='pyannote')
+                                    local_files_only=True, vad_method='pyannote',
+                                    asr_options={'initial_prompt': p.get('initial_prompt')})
         stage('asr')
         result = model.transcribe(audio, batch_size=p['batch_size'])
     finally:

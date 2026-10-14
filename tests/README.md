@@ -15,6 +15,10 @@ check_exports: rzeczywiste writery, polski tekst, granice minut/godzin, blokada 
 
 Testy tworzą własne katalogi runs i nie sprzątają ich automatycznie. Nie instalują ani nie pobierają zasobów. Wyniki: [raport D2](../docs/D2_TEST_REPORT.md).
 
+## D2.1
+
+`-B -m unittest discover -s tests -p 'test_*.py' -v` uruchamia 16 testów: dotychczasowe 11 oraz 5 z test_prompt.py (z podprzypadkami). Nowe testy sprawdzają zgodność profilu, walidację, rzeczywisty widget Tkinter, edycję/wyczyszczenie bez zapisu profilu, dokładne opcje adaptera, trwałe metadane etapów i błędów, kontroler z błędem wejścia i natychmiastowym anulowaniem. Wywołania silnika w testach jednostkowych są zastąpione atrapami; testy kontrolera używają prawdziwego procesu workera. Oddzielny krótki przebieg rzeczywistego silnika opisuje [raport D2.1](../docs/D2_1_TEST_REPORT.md).
+
 ## Regresja launchera
 
 `tests/check_launcher.py` uruchamiaj istniejącym Pythonem z `-B` i argumentem:

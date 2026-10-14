@@ -2,14 +2,14 @@
 
 Lokalne GUI Tkinter do przygotowania i transkrypcji pojedynczego nagrania. Jeden profil WEBINAR_RUI_PL, bez diarizacji, streszczeń i kolejki.
 
-**D2 zaimplementowany; krótki pipeline CUDA + alignment przeszedł test offline. Do formalnego odbioru użytkownika. D3 nie rozpoczęto.** Dowody: [raport testów](docs/D2_TEST_REPORT.md), [stan](docs/CURRENT_STATE.md), [handoff](99_HANDOFF/CURRENT/HANDOFF.md).
+**D2 formalnie zatwierdzony w zleceniu D2.1. D2.1 dodaje opcjonalny prompt transkrypcji. D3 nie rozpoczęto.** Dowody: [raport D2.1](docs/D2_1_TEST_REPORT.md), [raport D2](docs/D2_TEST_REPORT.md), [stan](docs/CURRENT_STATE.md), [handoff](99_HANDOFF/CURRENT/HANDOFF.md).
 
 ## Pierwsze uruchomienie
 
 1. Otwórz `Start.cmd` dwuklikiem. Korzysta z interpretera w ignorowanym `config/local.toml`; nie instaluje pakietów. Polityka PowerShell dotyczy wyłącznie procesu uruchomienia, bez zmiany ustawień Windows.
 2. Kliknij **Wybierz plik**, następnie **Sprawdź plik**. Zobaczysz format, kodek, czas, częstotliwość, kanały i ostrzeżenia.
 3. Opcjonalnie **Przygotuj WAV** sprawdza konwersję bez silnika.
-4. Sprawdź urządzenie, typ obliczeń, batch i alignment. **Transkrybuj** wykonuje pełny przebieg od oryginału, z własnym przygotowaniem WAV. Każda operacja tworzy osobny katalog; nie wznawia poprzedniego zadania.
+4. Sprawdź urządzenie, typ obliczeń, batch i alignment. Pole **Prompt transkrypcji (opcjonalny)** zawiera domyślny tekst profilu; możesz go edytować lub wyczyścić dla bieżącego uruchomienia. Profil nie zostanie zmieniony. **Transkrybuj** wykonuje pełny przebieg od oryginału, z własnym przygotowaniem WAV. Każda operacja tworzy osobny katalog; nie wznawia poprzedniego zadania.
 5. **Przerwij** kończy wyłącznie procesy bieżącego zadania. Zamknięcie okna podczas pracy również anuluje zadanie i czeka na zapis stanu. **Otwórz wyniki** pokazuje ostatni katalog.
 
 Lokalną konfigurację przygotowano w D2. Wyniki są w `runs/jobs/`, poza Git; dane testowe w innych podkatalogach `runs/`. Alternatywa: uruchom `Start.ps1` z PowerShell albo skonfigurowanym Pythonem `-B src/gui.py`. Nie uruchamiaj ani nie importuj źródłowego transcribe_trip_meeting.py.
@@ -23,6 +23,8 @@ Udana transkrypcja zawiera transcript.txt, transcript.srt, transcript.json, run.
 Przygotowanie: PCM s16le / 16 kHz / mono. Próg ostrzeżenia długości 0,1 s jest konfigurowalny i nie gwarantuje synchronizacji. MVP odrzuca wiele ścieżek audio i offsety powyżej 0,1 s. Drobne niezerowe offsety są raportowane; napisy odnoszą się do początku zdekodowanego audio. Długość kontenera zastępuje brakującą długość ścieżki wyłącznie jako przybliżenie. Nie ma cichej korekty czasu.
 
 Model large-v3 i język pl są stałe dla jedynego profilu. Można zmieniać urządzenie cuda/cpu, float16/float32/int8, batch 1–64 i alignment. CPU z float16 jest odrzucany. Nie ma automatycznej zmiany parametrów po błędzie. CPU i alternatywne typy obliczeń nie przeszły pełnego testu D2.
+
+Opcjonalne pole JSON `initial_prompt` przyjmuje tekst albo null. Brak pola, null, pusty tekst lub same białe znaki oznaczają brak promptu. Dostarczony profil ma pustą wartość. Niepusty tekst jest przekazywany bez zmian i zapisywany w metadanych; biblioteka usuwa skrajne białe znaki przed tokenizacją i wykorzystuje najwyżej ostatnie 223 tokeny promptu. Stosuj krótki kontekst lub terminologię; prompt nie gwarantuje poprawnej transkrypcji. Szczegóły zapisu przy błędzie/anulowaniu: [dane](docs/DATA.md).
 
 Brak lokalnych modeli, NLTK lub CUDA kończy zadanie czytelnym błędem. Pobieranie i automatyczne naprawy są wyłączone. Obecne ostrzeżenie TorchCodec nie zablokowało ścieżki FFmpeg → audio w pamięci. Długie nagrania są wczytywane do RAM; test 20 s nie potwierdza wydajności ani jakości pełnego webinaru.
 
@@ -42,4 +44,4 @@ Brak lokalnych modeli, NLTK lub CUDA kończy zadanie czytelnym błędem. Pobiera
 - Historyczne D0: [discovery](DISCOVERY_REPORT.md), [reuse](REUSE_MATRIX.md), [rekomendacja](MVP_RECOMMENDATION.md).
 - [Konfiguracja](config/local.example.toml), [profil](config/WEBINAR_RUI_PL.json), [moduły](src/README.md), [testy](tests/README.md).
 
-Odbiór D2 i autoryzacja pilotażu RUI/D3 należą do użytkownika.
+Odbiór D2.1 i osobna autoryzacja pilotażu RUI/D3 należą do użytkownika.

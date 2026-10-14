@@ -1,53 +1,35 @@
-# WHISPERX_GUI — checkpoint D2
+# WHISPERX_GUI — checkpoint D2.1
 
-Data: 14.10.2026. Odbiorca: główna rozmowa WHISPERX_GUI, za pośrednictwem użytkownika.
+Data: 14.10.2026. Odbiorca: główna rozmowa ChatGPT projektu WHISPERX_GUI, za pośrednictwem użytkownika.
 
-**D2: COMPLETE wykonawczo, do formalnego odbioru. D0/D1 zatwierdzone zleceniem D2. D3 nie rozpoczęto.**
+**Status: COMPLETE wykonawczo, do odbioru.** Zlecenie „D2.1: INITIAL PROMPT — AUTHORIZED” formalnie zatwierdza D2. D3 nie rozpoczęto; wymaga osobnej autoryzacji.
 
-## Aktualizacja — poprawka pierwszego uruchomienia D2
+## Implementacja i API
 
-14.10.2026: naprawiono zgłoszony ParserError. Potwierdzona przyczyna: Start.ps1 UTF-8 bez BOM był interpretowany jako CP1250 przez Windows PowerShell 5.1.26100.9711; poprzednia kontrola składni używała PS7.6.5. Treść launchera jest teraz ASCII, TOML odczytywany jawnie jako UTF-8. Start.cmd wskazuje systemowy PowerShell, zachowuje kod błędu i otwarte okno konsoli. Błędy loadera GUI przy starcie są wypisywane do konsoli z kodem 1 zamiast niewidocznego w teście modalu.
+Lokalnie potwierdzono WhisperX 3.8.6/faster-whisper 1.2.1: `whisperx.load_model(..., asr_options={'initial_prompt': tekst_lub_None})`. Nie jest to argument model.transcribe. Kod batched ASR oczekuje str/None; strip i tokenizacja należą do biblioteki. Kontekst jest ograniczony do ostatnich 223 tokenów. Nie zmieniono VAD, alignmentu, audio ani pozostałych parametrów.
 
-PASS: rzeczywiste Start.cmd → Start.ps1 → Python → widoczne GUI, zamknięcie z kodem 0; katalog z polskimi znakami/spacjami; brak TOML, błędne pole python, nieistniejący interpreter i uszkodzona składnia TOML (czytelne komunikaty, kod 1). Test wykonywał cmd.exe /c, bez atrap GUI; gest dwukliku pozostaje do ręcznego odbioru. Początkowy test modalu dla uszkodzonego TOML przekroczył timeout; po poprawce komunikacji test przeszedł. [Raport i dowody](../../docs/D2_TEST_REPORT.md), test regresji tests/check_launcher.py.
+Profil JSON dopuszcza opcjonalne initial_prompt i zachowuje zgodność wcześniejszego schematu. Dostarczona wartość jest pusta. Brak/null/pusty tekst/same białe znaki → brak promptu; inny tekst jest przekazywany i zapisywany dokładnie. GUI wczytuje domyślną wartość, pozwala edytować/wyczyścić tekst; zmiana dotyczy uruchomienia i nie zapisuje profilu. Pole pozostaje w głównym oknie.
 
-Nie zmieniono silnika, źródłowego WhisperX, środowiska Python ani konfiguracji użytkownika; brak instalacji i pobrań. GPU nie testowano ponownie. Start użytkownika: dwuklik Start.cmd; przy błędzie przeczytaj zachowany komunikat konsoli i popraw local.toml według README.
+run.json: parameters.initial_prompt to konfiguracja; główne initial_prompt + initial_prompt_state potwierdzają przyjęcie opcji przez silnik. not_submitted oznacza etap przed przekazaniem, submission_unconfirmed przerwanie/błąd w okolicy load_model, accepted_by_engine pomyślny powrót load_model. Nie mylić niepotwierdzonego null z potwierdzonym pustym promptem. Późniejszy błąd/anulowanie zachowuje potwierdzoną wartość. [Pełna semantyka](../../docs/DATA.md).
 
-Branch main. Bazowy checkpoint D2: 97b371c658c3133eb1a6307e6d8a0febf97edf38. Niniejsza poprawka ma osobny lokalny commit „Fix Windows PowerShell launcher encoding and startup errors”; jego SHA jest HEAD po zakończeniu poprawki i zostaje podane w odpowiedzi. Status/branch sprawdzane po commicie, bez push. Poniższe informacje o wcześniejszych commitach i testach opisują pierwotną implementację D2.
+## Zmienione pliki
 
-Poprawka zakończona, do odbioru D2. Nie rozpoczęto D2.1 ani D3.
+Kod: src/configuration.py, gui.py, controller.py, engine.py, worker.py. Konfiguracja: config/WEBINAR_RUI_PL.json. Testy: tests/test_prompt.py, tests/README.md. Dokumentacja: README.md, docs/ARCHITECTURE.md, DATA.md, DECISIONS.md, CURRENT_STATE.md, D2_1_TEST_REPORT.md i ten jeden bieżący handoff. Bez zmian kontraktu, standardu i launcherów.
 
-## Funkcje i ponowne wykorzystanie
+## Testy i ochrona
 
-GUI Tkinter: pojedyncze audio/wideo, metadane, jeden profil z pliku, parametry urządzenia/compute/batch/alignment, osobne sprawdzenie i przygotowanie WAV, pełna transkrypcja, status/log, anulowanie i otwarcie wyników. Model large-v3 i język pl pozostają stałe dla jedynego profilu.
+PASS: 16/16 testów (11 regresji D2 + 5 nowych z podprzypadkami). Pokryte brak/pusty/domyslny prompt, nieprawidłowe typy, rzeczywisty widget Tkinter, edycja/wyczyszczenie, niezmienność profilu, dokładne argumenty adaptera, trwałe metadane przy sukcesie/błędach i wczesnym anulowaniu. Testy adaptera/orkiestracji workera używają atrap kosztownych operacji; test kontrolera uruchamia prawdziwy worker.
 
-REUSE: istniejący Python/stos, Tkinter, FFprobe/FFmpeg, WhisperX/faster-whisper/CTranslate2, VAD pyannote, modele ASR/PL i writery TXT/SRT/JSON. ADAPT: sekwencja API i zwalniania modeli z transcribe_trip_meeting.py, bez jego importu. BUILD: kontroler/GUI, walidacja, Job Object, offline/preflight, unikatowe katalogi, manifest i kontrola kompletności. Nie przeniesiono błędnej srt_ts.
+Rzeczywisty krótki pipeline z promptem: 20 s próbki D2, large-v3/pl/cuda/float16/batch 8/alignment, succeeded, 6 segmentów, 25,047 s, komplet pięciu wyników. Dokładny prompt potwierdzony w run.json, brak pełnego tekstu w process.log. Wynik: runs/jobs/20261014_184459_6d3c189f03194b9586b81fea97116ea8. Dowody: runs/d21_40fc899cc42a4be0b03cb9e1950390b1. [Raport](../../docs/D2_1_TEST_REPORT.md).
 
-## Weryfikacja
+Składnia Python i granice układu rzeczywiście utworzonego GUI przy 940x810 i 760x680 — PASS. Ręczny odbiór wyglądu/dwukliku pozostaje po stronie użytkownika. Launchery niezmienione; wcześniejsza poprawka Windows PowerShell i jej testy są w [raporcie D2](../../docs/D2_TEST_REPORT.md).
 
-PASS: 11 testów logiki/integracji, responsywność Tkinter, rzeczywista konwersja WAV/MKV, błędne wejście, brak/wiele ścieżek, ostrzeżenie długości, brak nadpisania, Job Object kończący potomny FFmpeg i zachowujący niezależny proces, biblioteczne eksporty i granice minuty/godziny, blokada sieci i zapisów poza zadaniem. Składnia Python/PowerShell, ignore, linki zmienianych dokumentów, staged diff bez danych wykonawczych i sygnatur sekretów — PASS.
+Źródło C:\AI\WhisperX: 46565 plików bez zmian ścieżki/rozmiaru/mtime_ns przed/po; nie pełny hash instalacji. SHA256 próbki identyczne. Brak modyfikacji źródła, .venv, modeli, konfiguracji użytkownika, nagrań i poprzednich wyników. Bez instalacji/pobrań/drugiego venv/push. Każdy przebieg miał osobny katalog poza Git.
 
-GPU/offline: potwierdzono dwa pełne przebiegi próbki 20 s, large-v3/pl/cuda/float16/batch 8 + alignment PL na RTX 5070 Ti, 2 segmenty i 58 słów. Ostatni 23,766 s, komplet pięciu plików, succeeded. Anulowanie rzeczywistego ASR i alignmentu — PASS, cancelled, WAV zachowane. Offline oznacza lokalne zasoby i aktywne blokady bibliotek/Python, nie audyt sieci kodu natywnego.
+NOT TESTED w D2.1: pełny RUI, jakość/terminologia/synchronizacja długiego nagrania, CPU/inne compute i drugie stanowisko. Nie powtarzano kosztownych testów anulowania GPU z D2. Ostrzeżenie TorchCodec nadal nie blokuje ścieżki FFmpeg.
 
-Brak FAIL w końcowych testach. NOT TESTED: pełny RUI, odsłuch/terminologia/synchronizacja, RAM/VRAM długiego materiału, CPU/inne compute, pełny przebieg bez alignmentu, drugie stanowisko, brak GPU/OOM/dysk pełny/awaria systemu i ręczny odbiór wyglądu GUI. Nie przedstawiać tych elementów jako PASS.
+## Git i kolejny krok
 
-Szczegóły i identyfikatory lokalnych dowodów: [D2_TEST_REPORT](../../docs/D2_TEST_REPORT.md). Końcowy pipeline: runs/jobs/20261014_181727_8d98f212a70f455ea3f9315c5f6d1d32, prywatne run.json i process.log poza Git.
+Branch: main. Lokalny commit zamykający: „Add optional transcription prompt with execution provenance”. Jego SHA zostaje podane w odpowiedzi końcowej po kontroli statusu/brancha; nie można wpisać SHA własnego commita do jego treści. Przegląd staged diff obejmuje zakres i dane wrażliwe; dane wykonawcze i local.toml pozostają ignorowane. Bez remote/push.
 
-## Ograniczenia i decyzje
-
-TorchCodec zgłasza niedostępne DLL; ścieżka FFmpeg → audio w pamięci działa. Nie naprawiano ani nie aktualizowano środowiska. Lightning adaptuje checkpoint tylko w pamięci, bez migracji pliku. Brak koniecznej decyzji blokującej D2.
-
-Próg długości 0,1 s jest konfigurowalny, bez gwarancji synchronizacji. Wiele ścieżek i offset >0,1 s są odrzucane; drobne offsety jawnie raportowane. Pośrednie zachowujemy także po sukcesie. Każda operacja tworzy nowy katalog; transkrypcja ponownie przygotowuje WAV z oryginału. Awaria całej aplikacji/systemu może pozostawić running; brak automatycznej naprawy/wznowienia.
-
-## Ochrona i Git
-
-Źródło C:\AI\WhisperX, .venv, modele, nagrania i wcześniejsze wyniki pozostały tylko do odczytu. Porównanie 46565 ścieżek/rozmiarów/mtime_ns przed i po D2 identyczne; nie jest to pełny hash zawartości. Kontrakt i standard zachowały oryginalne SHA256 wskazane w raporcie. Bez instalacji, pobrań, drugiego venv, zmian globalnych Windows i push.
-
-Repozytorium C:\AI\WhisperX_GUI, branch main. Commit implementacji: **6c611e121ac290ee08807649913229b512fc44cb**. Po nim working tree był czysty. Niniejszy handoff stanowi osobny commit „Record D2 verification and handoff”; jego SHA jest bieżącym HEAD po zakończeniu D2 i jest przekazane w końcowej odpowiedzi. SHA własnego commita nie może być wpisane do jego treści bez zmiany SHA. Po commicie checkpointu kontrolowane są status i branch. Brak remote/push; dane i lokalny TOML ignorowane.
-
-## Pierwszy start i proponowany D3
-
-Dwuklik **Start.cmd** w repozytorium. Lokalny config/local.toml jest gotowy, output wskazuje runs/jobs. Wybierz plik → Sprawdź plik → opcjonalnie Przygotuj WAV → Transkrybuj. Przerwij kończy własne drzewo procesów; Otwórz wyniki pokazuje rezultaty. Pełna instrukcja i nowe stanowisko: [README](../../README.md).
-
-Po odbiorze D2 użytkownik osobno autoryzuje D3 i wskazuje webinar RUI. Rekomendacja: inspekcja metadanych, przygotowanie i kontrola długości/offsetów, pełna transkrypcja w nowym katalogu, sprawdzenie pięciu wyników, odsłuch początku/środka/końca i ocena terminologii, raport jakości oraz RAM/VRAM. Bez streszczeń, diarizacji i analizy prawnej.
-
-Prace D2 zakończone. Pilotażu RUI nie uruchomiono. Decyzja o odbiorze i dalszym etapie należy wyłącznie do użytkownika.
+Gotowość techniczna do D3 po odbiorze D2.1 i odrębnej autoryzacji użytkownika. Prompt terminologiczny można ustalić w pilotażu. Start: dwuklik Start.cmd, wybór nagrania, opcjonalna edycja promptu, Transkrybuj. Na D2.1 prace zakończono; pilotażu nie uruchomiono.
