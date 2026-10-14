@@ -1,35 +1,41 @@
-# WHISPERX_GUI — checkpoint D2.1
+# WHISPERX_GUI — checkpoint D3
 
-Data: 14.10.2026. Odbiorca: główna rozmowa ChatGPT projektu WHISPERX_GUI, za pośrednictwem użytkownika.
+Data: 14.10.2026. Odbiorca: główna rozmowa ChatGPT WHISPERX_GUI, za pośrednictwem użytkownika.
 
-**Status: COMPLETE wykonawczo, do odbioru.** Zlecenie „D2.1: INITIAL PROMPT — AUTHORIZED” formalnie zatwierdza D2. D3 nie rozpoczęto; wymaga osobnej autoryzacji.
+**D3: PARTIAL.** D0–D2.1 zatwierdzone w zleceniu D3. Jeden pełny przebieg succeeded, ale odsłuch i jakość akustyczna NOT VERIFIED. D4 nie rozpoczęto.
 
-## Implementacja i API
+## Nagranie i parametry
 
-Lokalnie potwierdzono WhisperX 3.8.6/faster-whisper 1.2.1: `whisperx.load_model(..., asr_options={'initial_prompt': tekst_lub_None})`. Nie jest to argument model.transcribe. Kod batched ASR oczekuje str/None; strip i tokenizacja należą do biblioteki. Kontekst jest ograniczony do ostatnich 223 tokenów. Nie zmieniono VAD, alignmentu, audio ani pozostałych parametrów.
+`C:\AI\WhisperX_GUI\INPUT\Webinar_RUI_2026-10-14.mp4`, 321387385 B, audio 7123,029 s. SHA-256 przed/po: `fd7bc2854a3a01a889972f9c2252e89e3a2c2c9320d78dc68398e53327cb6660`. Jedna ścieżka AAC 48 kHz stereo, offset 0. WAV PCM s16le/16 kHz/mono, delta +0,312 ms, bez cięć.
 
-Profil JSON dopuszcza opcjonalne initial_prompt i zachowuje zgodność wcześniejszego schematu. Dostarczona wartość jest pusta. Brak/null/pusty tekst/same białe znaki → brak promptu; inny tekst jest przekazywany i zapisywany dokładnie. GUI wczytuje domyślną wartość, pozwala edytować/wyczyścić tekst; zmiana dotyczy uruchomienia i nie zapisuje profilu. Pole pozostaje w głównym oknie.
+WEBINAR_RUI_PL: large-v3/pl/cuda/float16/batch 8/alignment=true/diarization=false. Prompt uruchomienia przyjęty (`accepted_by_engine`), identyczny w konfiguracji i potwierdzeniu run.json:
 
-run.json: parameters.initial_prompt to konfiguracja; główne initial_prompt + initial_prompt_state potwierdzają przyjęcie opcji przez silnik. not_submitted oznacza etap przed przekazaniem, submission_unconfirmed przerwanie/błąd w okolicy load_model, accepted_by_engine pomyślny powrót load_model. Nie mylić niepotwierdzonego null z potwierdzonym pustym promptem. Późniejszy błąd/anulowanie zachowuje potwierdzoną wartość. [Pełna semantyka](../../docs/DATA.md).
+> Rejestr Urbanistyczny, plan ogólny gminy, miejscowy plan zagospodarowania przestrzennego, decyzja o warunkach zabudowy, akt planowania przestrzennego, GML, APP, dane przestrzenne, zbiór danych przestrzennych, geoportal.
 
-## Zmienione pliki
+## Pięć artefaktów
 
-Kod: src/configuration.py, gui.py, controller.py, engine.py, worker.py. Konfiguracja: config/WEBINAR_RUI_PL.json. Testy: tests/test_prompt.py, tests/README.md. Dokumentacja: README.md, docs/ARCHITECTURE.md, DATA.md, DECISIONS.md, CURRENT_STATE.md, D2_1_TEST_REPORT.md i ten jeden bieżący handoff. Bez zmian kontraktu, standardu i launcherów.
+Wspólny katalog: `C:\AI\WhisperX_GUI\runs\jobs\20261014_190042_d74c919aa76a4dfe9e6582273f727323`:
 
-## Testy i ochrona
+- `transcript.txt` — tekst;
+- `transcript.srt` — napisy;
+- `transcript.json` — segmenty i słowa;
+- `run.json` — źródło, rzeczywiste parametry, wersje i status;
+- `process.log` — etapy i ostrzeżenia.
 
-PASS: 16/16 testów (11 regresji D2 + 5 nowych z podprzypadkami). Pokryte brak/pusty/domyslny prompt, nieprawidłowe typy, rzeczywisty widget Tkinter, edycja/wyczyszczenie, niezmienność profilu, dokładne argumenty adaptera, trwałe metadane przy sukcesie/błędach i wczesnym anulowaniu. Testy adaptera/orkiestracji workera używają atrap kosztownych operacji; test kontrolera uruchamia prawdziwy worker.
+Pełna transkrypcja z alignmentem: 196,781 s, exit_code=0, proces zwolniony. 748 segmentów, 11903 słowa z czasami. TXT/SRT zgodne z JSON, brak nakładania segmentów. Zakres 8,819–7123,053 s; ostatni koniec 23,688 ms poza WAV, w tolerancji aplikacji 100 ms. Nie korygowano wyników. Najdłuższa przerwa 162,242 s wymaga odsłuchu.
 
-Rzeczywisty krótki pipeline z promptem: 20 s próbki D2, large-v3/pl/cuda/float16/batch 8/alignment, succeeded, 6 segmentów, 25,047 s, komplet pięciu wyników. Dokładny prompt potwierdzony w run.json, brak pełnego tekstu w process.log. Wynik: runs/jobs/20261014_184459_6d3c189f03194b9586b81fea97116ea8. Dowody: runs/d21_40fc899cc42a4be0b03cb9e1950390b1. [Raport](../../docs/D2_1_TEST_REPORT.md).
+## Jakość, ograniczenia i ochrona
 
-Składnia Python i granice układu rzeczywiście utworzonego GUI przy 940x810 i 760x680 — PASS. Ręczny odbiór wyglądu/dwukliku pozostaje po stronie użytkownika. Launchery niezmienione; wcześniejsza poprawka Windows PowerShell i jej testy są w [raporcie D2](../../docs/D2_TEST_REPORT.md).
+Przegląd tekstu trzech okien początku/środka/końca wykonany. Podejrzane pożegnania w 95–154 s, przerwy i końcówka do odsłuchu. Kompletność mowy, synchronizacja, poprawność specjalistycznych pojęć względem audio i wpływ promptu: NOT VERIFIED. Nie wykonano oceny prawnej ani streszczenia. D3 wywołany przez kontroler aplikacji; interakcja z widocznym GUI podczas tego przebiegu nieweryfikowana.
 
-Źródło C:\AI\WhisperX: 46565 plików bez zmian ścieżki/rozmiaru/mtime_ns przed/po; nie pełny hash instalacji. SHA256 próbki identyczne. Brak modyfikacji źródła, .venv, modeli, konfiguracji użytkownika, nagrań i poprzednich wyników. Bez instalacji/pobrań/drugiego venv/push. Każdy przebieg miał osobny katalog poza Git.
+Największa próbka VRAM całej karty: 9309/16303 MiB; nie szczyt procesu. RAM niedostępny w tej diagnostyce. Znane ostrzeżenia TorchCodec i TF32; adaptacja checkpointu Lightning tylko w pamięci. Bez błędu zasobów i bez powtórzenia pełnej transkrypcji.
 
-NOT TESTED w D2.1: pełny RUI, jakość/terminologia/synchronizacja długiego nagrania, CPU/inne compute i drugie stanowisko. Nie powtarzano kosztownych testów anulowania GPU z D2. Ostrzeżenie TorchCodec nadal nie blokuje ścieżki FFmpeg.
+Oryginał niezmieniony (SHA-256); 46565 plików chronionego C:\AI\WhisperX bez zmian ścieżek/rozmiarów/mtime_ns, nie pełne hashowanie instalacji. Profil i local.toml bez zmian. Bez instalacji, pobrań, zmiany venv, nadpisania wcześniejszych wyników i push. Dowody w `runs/d3_20261014_190033`, poza Git. Brak zmian implementacji.
 
-## Git i kolejny krok
+[Pełny raport D3](../../docs/D3_PILOT_REPORT.md) opisuje kontrole, przerwy, próbki tekstu, czas i ograniczenia. [Stan](../../docs/CURRENT_STATE.md), [decyzje](../../docs/DECISIONS.md).
 
-Branch: main. Lokalny commit zamykający: „Add optional transcription prompt with execution provenance”. Jego SHA zostaje podane w odpowiedzi końcowej po kontroli statusu/brancha; nie można wpisać SHA własnego commita do jego treści. Przegląd staged diff obejmuje zakres i dane wrażliwe; dane wykonawcze i local.toml pozostają ignorowane. Bez remote/push.
+## Git i następna decyzja
 
-Gotowość techniczna do D3 po odbiorze D2.1 i odrębnej autoryzacji użytkownika. Prompt terminologiczny można ustalić w pilotażu. Start: dwuklik Start.cmd, wybór nagrania, opcjonalna edycja promptu, Transkrybuj. Na D2.1 prace zakończono; pilotażu nie uruchomiono.
+Branch main. Kod pilotażu: `f45474170fc8da67537cdd59d9eab337fd9e3c9a`. Lokalny commit dokumentacji: `Document RUI pilot results and verification limits`; jego SHA i status po commicie w odpowiedzi końcowej. Zakres commita: raport, stan, decyzje, README i ten jeden handoff, bez danych.
+
+Rekomendowany następny krok: odsłuch wskazanych fragmentów i ocena D3 przez użytkownika. Nie uruchamiać automatycznie kolejnej transkrypcji. Nie rozpoczynać D4 ani rozwoju bez decyzji użytkownika.

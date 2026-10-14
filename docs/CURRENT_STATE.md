@@ -1,17 +1,15 @@
-# Bieżący stan — 14.10.2026, po D2.1
+# Bieżący stan — 14.10.2026, po pilotażu D3
 
-**D2.1: COMPLETE wykonawczo, do odbioru użytkownika. D2 formalnie zatwierdzony w zleceniu D2.1. D3 nie rozpoczęto i wymaga odrębnej autoryzacji.**
+**D3: PARTIAL, do oceny użytkownika. D0–D2.1 zatwierdzone zleceniem D3. D4 nie rozpoczęto.**
 
-MVP obsługuje opcjonalny initial_prompt z profilu JSON, edytowalny w wielowierszowym polu GUI dla uruchomienia. Profil pozostaje niezmieniony; dostarczona wartość jest pusta. Brak/null/pusty tekst/białe znaki oznaczają brak promptu. Pozostały tekst przechodzi bez zmian przez kontroler i adapter do load_model/asr_options lokalnego WhisperX 3.8.6.
+Jeden pełny przebieg Webinar_RUI_2026-10-14.mp4 (1:58:43) zakończył się succeeded w 196,781 s. Profil WEBINAR_RUI_PL: large-v3/pl/cuda/float16/batch 8, alignment włączony, diarizacja wyłączona. Dokładny prompt terminologiczny zlecenia przyjęty przez silnik i zapisany w run.json; profil niezmieniony.
 
-run.json odróżnia konfigurację (parameters.initial_prompt) od wartości potwierdzonej po load_model (initial_prompt + initial_prompt_state). Błąd/anulowanie przed ASR nie deklaruje użycia promptu; przerwanie ładowania pozostawia submission_unconfirmed. Nie dopisujemy pełnego promptu do process.log. Pozostałe parametry i architektura D2 zachowane.
+Wyniki: `C:\AI\WhisperX_GUI\runs\jobs\20261014_190042_d74c919aa76a4dfe9e6582273f727323`. Komplet TXT/SRT/JSON/run.json/process.log; 748 segmentów, 11903 słowa z czasami. TXT/SRT zgodne z JSON. WAV 16 kHz mono ma różnicę długości +0,312 ms. Ostatni znacznik 23,688 ms poza WAV, w tolerancji aplikacji 100 ms; ścisła kontrola granicy nie przeszła dla ostatniego segmentu/słowa. Brak nakładania segmentów.
 
-Weryfikacja: 16/16 testów PASS (11 D2 + 5 ukierunkowanych z podprzypadkami), rzeczywisty widget Tkinter i niezmienność profilu, błędy/anulowanie, dokładne przekazanie i JSON. Jeden pełny przebieg lokalnej próbki D2 20 s z promptem: succeeded, 6 segmentów, 25,047 s, komplet wyników. Składnia Python i granice układu widocznego GUI 940x810/760x680 — PASS. Launchery niezmienione; wcześniejsze testy uruchomienia opisano w raporcie D2.
+Przejrzano tekst początku/środka/końca; podejrzane pożegnania na początku i długie przerwy wymagają odsłuchu. Kontrola akustyczna, kompletność mowy, synchronizacja oraz wpływ promptu na jakość: NOT VERIFIED. Pełny przebieg wywołano przez istniejący kontroler, bez sterowania widocznym GUI w D3. RAM niedostępny w diagnostyce; największa punktowa obserwacja całej karty GPU 9309/16303 MiB, nie pomiar szczytu.
 
-Ochrona źródła: przed/po identyczne ścieżki, rozmiary i mtime_ns wszystkich 46565 plików C:\AI\WhisperX. SHA256 próbki również identyczne. Nie jest to pełne hashowanie instalacji. Bez zmian środowiska, instalacji, pobierania, nadpisywania wcześniejszych wyników i push. Dane testowe oraz lokalny TOML poza Git.
+Oryginał: SHA-256 przed/po identyczne. Chronione źródło: identyczne ścieżki/rozmiary/mtime_ns 46565 plików, nie pełny hash instalacji. Profil/local.toml bez zmian. Bez instalacji, pobierania, zmian środowiska, nadpisania wcześniejszych wyników i push. Kod aplikacji nie wymagał zmian; znane ostrzeżenia TorchCodec/TF32 nie zablokowały pracy. Worker zakończony kodem 0, kontroler zwolnił proces.
 
-Ograniczenia: nie oceniano jakości terminologii RUI, pełnego webinaru, CPU/innych compute ani długiego materiału. Nie powtarzano macierzy kosztownych testów GPU. Ostrzeżenie TorchCodec nadal nie blokuje używanego dekodowania. Ręczny odbiór wyglądu należy do użytkownika.
+Kolejny krok: użytkownik ocenia raport i wykonuje odsłuch wskazanych fragmentów; dalszy etap wymaga decyzji. Start aplikacji: dwuklik Start.cmd.
 
-Start: dwuklik Start.cmd. Kolejny krok: odbiór D2.1 i osobna autoryzacja D3 ze wskazaniem webinaru oraz ewentualnego promptu terminologicznego. Gotowość techniczna do takiego pilotażu, bez samodzielnego jego rozpoczęcia.
-
-[Raport D2.1](D2_1_TEST_REPORT.md), [raport D2](D2_TEST_REPORT.md), [decyzje](DECISIONS.md), [checkpoint](../99_HANDOFF/CURRENT/HANDOFF.md).
+[Raport D3](D3_PILOT_REPORT.md), [decyzje](DECISIONS.md), [checkpoint](../99_HANDOFF/CURRENT/HANDOFF.md). Historyczne testy: [D2.1](D2_1_TEST_REPORT.md), [D2](D2_TEST_REPORT.md).

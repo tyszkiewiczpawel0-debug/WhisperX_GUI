@@ -2,7 +2,7 @@
 
 Lokalne GUI Tkinter do przygotowania i transkrypcji pojedynczego nagrania. Jeden profil WEBINAR_RUI_PL, bez diarizacji, streszczeń i kolejki.
 
-**D2 formalnie zatwierdzony w zleceniu D2.1. D2.1 dodaje opcjonalny prompt transkrypcji. D3 nie rozpoczęto.** Dowody: [raport D2.1](docs/D2_1_TEST_REPORT.md), [raport D2](docs/D2_TEST_REPORT.md), [stan](docs/CURRENT_STATE.md), [handoff](99_HANDOFF/CURRENT/HANDOFF.md).
+**D0–D2.1 zatwierdzone. D3: PARTIAL — pełny pilotaż succeeded, odsłuch NOT VERIFIED; D4 nie rozpoczęto.** [Raport D3](docs/D3_PILOT_REPORT.md). Dowody: [raport D2.1](docs/D2_1_TEST_REPORT.md), [raport D2](docs/D2_TEST_REPORT.md), [stan](docs/CURRENT_STATE.md), [handoff](99_HANDOFF/CURRENT/HANDOFF.md).
 
 ## Pierwsze uruchomienie
 
@@ -44,4 +44,4 @@ Brak lokalnych modeli, NLTK lub CUDA kończy zadanie czytelnym błędem. Pobiera
 - Historyczne D0: [discovery](DISCOVERY_REPORT.md), [reuse](REUSE_MATRIX.md), [rekomendacja](MVP_RECOMMENDATION.md).
 - [Konfiguracja](config/local.example.toml), [profil](config/WEBINAR_RUI_PL.json), [moduły](src/README.md), [testy](tests/README.md).
 
-Odbiór D2.1 i osobna autoryzacja pilotażu RUI/D3 należą do użytkownika.
+Ocena D3, odsłuch wskazanych fragmentów oraz decyzja o dalszym etapie należą do użytkownika.

@@ -45,3 +45,11 @@ Powyższe stany są historyczne. Zlecenie użytkownika „D2.1: INITIAL PROMPT �
 - D-21 (wykonawcza): brak/null/pusty/białe znaki → None; pozostały tekst zachowany dokładnie. Nie przycinamy tekstu w GUI ani adapterze; biblioteczna tokenizacja ma własne ograniczenie kontekstu.
 - D-22 (wykonawcza): oddzielić parameters.initial_prompt od głównego initial_prompt i stanu not_submitted/submission_unconfirmed/accepted_by_engine. Nie deklarować przyjęcia opcji po nieudanym ładowaniu; anulowanie zachowuje ostatni trwały stan. Bez pełnego promptu w logach aplikacji.
 - D-23 (weryfikacja): ukierunkowane testy plus pojedynczy przebieg lokalnej próbki D2 z promptem; bez pełnego webinaru, powtarzania macierzy GPU i zmian środowiska. Odbiór D2.1 należy do użytkownika.
+
+## D3 — autoryzacja i pilotaż 14.10.2026
+
+- D-24 (użytkownik): zlecenie D3 potwierdza odbiór D0–D2.1, autoryzuje jeden pełny pilotaż nagrania RUI z INPUT, prompt terminologiczny, diagnostykę i lokalny checkpoint/Git. Nie otwiera D4 ani zgody na pobieranie/zmianę środowiska.
+- D-25 (wykonawcza): wykorzystano istniejący kontroler i pełny pipeline bez zmian kodu; jeden przebieg succeeded. Prompt dotyczy uruchomienia, profil i local.toml pozostają bez zmian. Nie powtarzano ASR dla pomiarów lub porównania promptu.
+- D-26 (obserwacja): ostatni segment/słowo 23,688 ms poza WAV, w istniejącej tolerancji 100 ms; wyniki zachowano bez przycinania. Struktura i wzajemna zgodność eksportów potwierdzone, ścisła granica audio nie jest PASS.
+- D-27 (ograniczenie): D3 PARTIAL z powodu niewykonanej kontroli akustycznej. Przegląd tekstu i timestampów nie zastępuje odsłuchu ani oceny kompletności. Podejrzane fragmenty początku, przerwy i zakończenie wskazano w raporcie do odsłuchu. Nie testowano widocznego GUI podczas pełnego przebiegu D3; RAM niedostępny, VRAM tylko punktowo dla całej karty.
+- D-28 (bramka): raport i jeden bieżący handoff do oceny użytkownika; D4 nie rozpoczęto. Nie przyjmujemy własnego sukcesu technicznego jako odbioru jakości lub MVP.
