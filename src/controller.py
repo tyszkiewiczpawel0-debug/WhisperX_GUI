@@ -10,7 +10,7 @@ import time
 import uuid
 
 from artifacts import save, complete
-from configuration import ROOT, parameters
+from configuration import APPLICATION_ID, APPLICATION_VERSION, ROOT, parameters
 from safety import environment
 from winjob import Job
 
@@ -49,7 +49,8 @@ class Controller:
             manifest = {'schema_version': 1, 'id': ident, 'status': 'running', 'stage': 'starting',
                         'mode': mode, 'started_at': datetime.now(timezone.utc).isoformat(),
                         'parameters': p, 'warnings': [], 'error': None, 'output_dir': str(run),
-                        'source': {'path': str(source)}, 'application': 'WHISPERX_GUI D2.1',
+                        'source': {'path': str(source)}, 'application': APPLICATION_ID,
+                        'application_version': APPLICATION_VERSION,
                         'initial_prompt': None, 'initial_prompt_state': 'not_submitted',
                         'code_sha256': {f.name: hashlib.sha256(f.read_bytes()).hexdigest()
                                         for f in sorted((ROOT / 'src').glob('*.py'))},
@@ -84,7 +85,7 @@ class Controller:
         try:
             env = environment(self.config, run)
             with (run / 'process.log').open('a', encoding='utf-8', buffering=1) as log:
-                log.write('WHISPERX_GUI: worker offline; zapis wyłącznie w zadaniu.\n')
+                log.write(f'{APPLICATION_ID}: worker offline; zapis wyłącznie w zadaniu.\n')
                 with self.lock:
                     self.job = Job()
                     process = subprocess.Popen([self.config['runtime']['python'], '-B', '-u',

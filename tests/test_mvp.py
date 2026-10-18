@@ -51,6 +51,25 @@ class MVP(unittest.TestCase):
             with self.assertRaises(ValueError):
                 configuration.parameters(p | changes)
 
+    def test_application_provenance(self):
+        self.assertEqual(configuration.APPLICATION_ID, 'WHISPERX_GUI')
+        self.assertEqual(configuration.APPLICATION_VERSION, '1.1.1')
+        for ident, mode, status in [('WEBINAR_RUI_PL', 'inspect', 'inspected'),
+                                    ('sesja_rady_gminy', 'prepare', 'prepared')]:
+            with self.subTest(profile=ident, mode=mode):
+                c = Controller(self.config)
+                run = c.start(self.audio, configuration.profile(ident), mode)
+                manifest = self.wait(c)
+                self.assertEqual(manifest['status'], status, manifest.get('error'))
+                self.assertEqual(manifest['application'], configuration.APPLICATION_ID)
+                self.assertEqual(manifest['application_version'], configuration.APPLICATION_VERSION)
+                self.assertEqual(manifest['schema_version'], 1)
+                request = json.loads((run / 'request.json').read_text(encoding='utf-8'))
+                self.assertEqual(manifest['parameters'], request['parameters'])
+                self.assertIn('configuration.py', manifest['code_sha256'])
+                self.assertIn('controller.py', manifest['code_sha256'])
+                self.assertEqual(set(manifest['results']), set(artifacts.REQUIRED))
+
     def test_profiles_and_audio_defaults(self):
         self.assertEqual(configuration.profile(), configuration.profile('WEBINAR_RUI_PL'))
         self.assertEqual(configuration.profile()['audio_timeline_mode'], 'legacy')
@@ -225,6 +244,8 @@ class MVP(unittest.TestCase):
         c.start(bad, configuration.profile(), 'inspect')
         m = self.wait(c)
         self.assertEqual(m['status'], 'failed')
+        self.assertEqual((m['application'], m['application_version']),
+                         (configuration.APPLICATION_ID, configuration.APPLICATION_VERSION))
         self.assertTrue(m['error'])
         self.assertTrue((c.run / 'process.log').stat().st_size)
 
@@ -259,6 +280,8 @@ class MVP(unittest.TestCase):
         c.cancel()
         m = self.wait(c)
         self.assertEqual(m['status'], 'cancelled')
+        self.assertEqual((m['application'], m['application_version']),
+                         (configuration.APPLICATION_ID, configuration.APPLICATION_VERSION))
 
     def test_job_kills_descendant_only(self):
         script = self.folder / 'child.py'

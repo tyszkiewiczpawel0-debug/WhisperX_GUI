@@ -5,6 +5,8 @@ from pathlib import Path
 import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
+APPLICATION_ID = 'WHISPERX_GUI'
+APPLICATION_VERSION = '1.1.1'
 PROFILES = {'WEBINAR_RUI_PL': 'WEBINAR_RUI_PL.json',
             'sesja_rady_gminy': 'sesja_rady_gminy.json'}
 
