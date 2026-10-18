@@ -1,3 +1,23 @@
+# Bieżący stan — 18.10.2026, analiza kolejnej wersji
+
+**ANALYSIS COMPLETE — IMPLEMENTATION PENDING APPROVAL**
+
+Nowe zlecenie obejmuje wyłącznie analizę wielu profili, profilu sesja_rady_gminy i przygotowania audio z zachowaniem osi czasu. MVP v1 pozostaje CLOSED / D4 APPROVED, z trzema historycznymi PARTIAL. Implementacji kolejnej wersji nie rozpoczęto; kontrakt v1.0 i standard bez zmian.
+
+Wejściowy main/HEAD = tag mvp-v1.0 = `a677fc6f62620752156fd2565edac6e3585090e0`; working tree był czysty. Lokalnie istnieje origin i tracking origin/main, inaczej niż we wcześniejszym handoffie; nie weryfikowano zdalnego stanu ani widoczności, bez sieci/push.
+
+[Analiza](../NEXT_VERSION_ANALYSIS.md) wskazuje konkretne funkcje, fakty i ograniczenia handoffu XXV. [Plan](../NEXT_VERSION_IMPLEMENTATION_PLAN.md) zawiera minimalny zakres, testy i bramki odbioru. Rekomendacja: wspólna funkcja przygotowania, stare polecenie dla webinaru, wariant z aresample=16000:async=1:first_pts=0 wybierany przez profil sesji. Reprezentacja opcji/metadanych pozostaje do zatwierdzenia; nie ustanowiono audio_timeline_mode.
+
+Dane XXV pochodzą z dostarczonego handoffu, bez niezależnego odtworzenia: master 4598,480 s, zwykły WAV 4594,048 s, filtrowany 4598,368 s. Pozostaje −112 ms względem master. Same długości nie dowodzą synchronizacji; przyszły odbiór wymaga problematycznego źródła i punktów kontrolnych.
+
+Weryfikacja obecnego kodu: 16/16 istniejących testów PASS, prawdziwe eksporty/blokady PASS, AST i walidacja konfiguracji PASS; Python -B, bez ASR/modeli/pobrań. Nowe dane testowe tylko w własnych ignorowanych runs; wcześniejszych plików nie usuwano. Zmiany wyłącznie dokumentacyjne. [Decyzje](DECISIONS.md) i [bieżący handoff](../99_HANDOFF/CURRENT/HANDOFF.md).
+
+Następny krok: użytkownik i główna rozmowa oceniają rekomendację i zatwierdzają ewentualny zakres implementacji oraz późniejszych testów. Analiza nie jest odbiorem ani zgodą na realizację.
+
+---
+
+## Historyczny stan zamknięcia MVP
+
 # Bieżący stan — 14.10.2026, checkpoint D4
 
 **MVP v1 CLOSED / D4 APPROVED — decyzja użytkownika z 14.10.2026 w zleceniu końcowego przeglądu repozytorium. D0, D1, D2 po poprawce launchera, D2.1 i D3: APPROVED. Nie otwarto kolejnej fazy rozwoju.**
