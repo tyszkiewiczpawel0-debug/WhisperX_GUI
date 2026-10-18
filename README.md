@@ -2,7 +2,7 @@
 
 Lokalne GUI Tkinter do przygotowania i transkrypcji pojedynczego nagrania. Profile WEBINAR_RUI_PL i sesja_rady_gminy, bez diarizacji, streszczeń i kolejki.
 
-**v1.1.0: RELEASE CANDIDATE READY — PENDING FINAL ACCEPTANCE.** [Zakres, wyniki testów i AUDIO-01](NEXT_VERSION_IMPLEMENTATION_PLAN.md#5-wykonanie-i-wyniki--18102026). Zamknięte MVP pozostaje punktem odniesienia w tagu mvp-v1.0.
+**v1.1.1 — poprawka provenance.** Nowe manifesty wskazują WHISPERX_GUI / 1.1.1; [stan wydania i publikacji](docs/CURRENT_STATE.md). [Zakres, wyniki testów i AUDIO-01](NEXT_VERSION_IMPLEMENTATION_PLAN.md#5-wykonanie-i-wyniki--18102026). Zamknięte MVP pozostaje punktem odniesienia w tagu mvp-v1.0.
 
 **MVP v1 CLOSED / D4 APPROVED — decyzja użytkownika z 14.10.2026.** [Ocena MVP: 6 PASS, 3 PARTIAL, 0 FAIL](docs/D4_MVP_REVIEW.md). Trzy PARTIAL pozostają: pełny przebieg sterowany przez widoczne GUI, pomiar responsywności podczas silnika i test drugiego stanowiska. [Raport D3](docs/D3_PILOT_REPORT.md). Dowody: [raport D2.1](docs/D2_1_TEST_REPORT.md), [raport D2](docs/D2_TEST_REPORT.md), [stan](docs/CURRENT_STATE.md), [handoff](99_HANDOFF/CURRENT/HANDOFF.md).
 

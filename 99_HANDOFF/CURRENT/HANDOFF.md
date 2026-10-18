@@ -1,24 +1,26 @@
-# WHISPERX_GUI — lokalny kandydat poprawki provenance v1.1.1
+# WHISPERX_GUI — finalizacja i publikacja v1.1.1
 
 Data: 18.10.2026. Odbiorcy: **użytkownik i główna rozmowa ChatGPT projektu WhisperX_GUI**.
 
-**PATCH READY — PENDING ACCEPTANCE**
+Poprawka odebrana przez użytkownika; **RELEASE AND PUBLICATION AUTHORIZED**. Status końcowy po potwierdzeniu push i referencji: **v1.1.1 PUBLISHED — PENDING FINAL VERIFICATION**.
 
-Punkt wyjścia: czysty main=origin/main=opublikowany v1.1.0, `fc5e2c76966c4219c50c0955ff3898c064614613`. Poprawka na lokalnej gałęzi `codex/provenance-1-1-1`. Dokładny SHA commita z kodem i tym checkpointem jest w końcowym przekazaniu i lokalnym runs/patch_1_1_1_00312c231de54295b715b44ebfe0d963/patch_commit.json; na gałęzi odtworzysz go przez git rev-parse HEAD. main, mvp-v1.0 i v1.1.0 nie są przesuwane. Nie utworzono tagu v1.1.1 ani nie wykonano push/publikacji poprawki.
+## Integracja i zakres
 
-## Zakres i kompatybilność
+Wejście: czysty codex/provenance-1-1-1, b8a0ef5d5fd5fe7f4591b10b64631d7cd521acfc; main=origin/main=zdalny main=v1.1.0 na fc5e2c76966c4219c50c0955ff3898c064614613. Brak lokalnego/zdalnego v1.1.1. Main przesunięto fast-forward do odebranej poprawki. Po nim wyłącznie minimalny dokumentacyjny checkpoint wydania.
 
-Jedynym miejscem nadawania starego identyfikatora był Controller.start; nie było centralnego źródła wersji aplikacji. Wykorzystano istniejący configuration.py: APPLICATION_ID=WHISPERX_GUI, APPLICATION_VERSION=1.1.1. Controller tworzy z tych stałych pola application/application_version i używa tego samego ID jako dotychczasowego prefiksu logu. Bez nowego modułu lub runtime zależnego od Git.
+Nowy manifest: application=WHISPERX_GUI, application_version=1.1.1; jedyne źródło APPLICATION_ID/APPLICATION_VERSION w configuration.py. Reszta schema 1/provenance/request i eksportów bez zmian; brak migracji wyników. Profile pozostają webinar=legacy i sesja=preserve. Bez nowych zmian kodu, konfiguracji, testów, środowiska, zależności lub zakresu funkcji. Poprzedni lokalny kandydat i jego dowody zostały formalnie odebrane przez użytkownika.
 
-Dodane pole wersji jest metadaną schema 1. Pozostałe pola provenance, request, TXT/SRT/transcript.json i ich znaczenie bez zmian. Stare manifesty z WHISPERX_GUI D2.1 bez application_version pozostają historyczne; brak migracji, nowych wymagań przy odczycie i modyfikacji wyników. Zmiany produkcyjne ograniczone do configuration.py i controller.py; profili, domyślnego preserve sesji/legacy webinaru, ASR, worker/offline/anulowania/Job Object ani środowiska nie zmieniono.
+## Weryfikacja
 
-## Weryfikacja i kontynuacja
+- **PASS:** po integracji 24/24 unittest, 7,366 s; realny worker inspect/prepare, nowe pola/wersja, oba profile, request/run, błędy/anulowanie, Job Object i dotychczasowa regresja. ASR w testach jednostkowych jest atrapą.
+- **PASS:** prawdziwe eksporty TXT/SRT/JSON, znaczniki czasu/słowa, blokady sieci i zapisu; nowe manifesty identyfikują WHISPERX_GUI/1.1.1. 149 zastanych run.json bez zmiany SHA-256. Poprzednie 134 niezmienione manifesty i 24/24 PASS pozostają historycznym dowodem odbioru, nie zastępują opisanej końcowej kontroli main.
+- **FAIL:** brak w zakończonych testach. Integralność publikacji wymaga zgodności lokalnego main, origin/main, zdalnego main i commita tagu; zwykły push bez force, bez nadpisywania kolidujących tagów/historii.
+- **NOT TESTED:** nowy rzeczywisty ASR i pełna transkrypcja (celowo nieponawiane), pełny preserve 98 min, pełny odsłuch/jakość, inne stanowisko/compute. Poprzedni pełny test użytkownika używał legacy; wcześniejsze preserve było sprawdzone na pięciu zdarzeniach i krótkim ASR.
 
-- **PASS:** 24/24 unittest (6,717 s), w tym nowy test tożsamości/wersji z realnym workerem inspect/prepare obu profili, schema 1, parametry request/run, hashe kodu i lista wyników. Pola sprawdzane także po błędzie wejścia i anulowaniu.
-- **PASS:** rzeczywiste writery TXT/SRT/JSON oraz blokady offline/zapisu, AST; nadal poprawne profile i istniejąca regresja pipeline'u.
-- **PASS:** 134 wcześniejsze run.json z identycznymi SHA-256 przed/po; 15 nowych manifestów ma application=WHISPERX_GUI/application_version=1.1.1. Produkcyjne moduły i konfiguracje poza zakresem bez zmian w diff względem v1.1.0.
-- **FAIL:** 0. **NOT TESTED w poprawce:** rzeczywisty ASR i pełna transkrypcja; brak zmian silnika nie uzasadniał ich ponawiania. Wcześniejsze ograniczenia v1.1.0 (pełny preserve, pełny odsłuch/jakość, inne stanowisko/compute) nie otrzymują nowych ocen PASS.
+## Git, publikacja i odtworzenie
 
-Logi i proof.json wyłącznie w powyższym ignorowanym katalogu runs. [CURRENT_STATE](../../docs/CURRENT_STATE.md), [DATA](../../docs/DATA.md), [DECISIONS D-55–D-58](../../docs/DECISIONS.md), [testy](../../tests/README.md). Uruchomienie Start.cmd bez zmian; nowa operacja inspect/prepare/transcribe tworzy manifest z nowymi polami. Nie używać starych wyników do oceny nowej wersji pola application.
+Repozytorium: https://github.com/tyszkiewiczpawel0-debug/WhisperX_GUI. Publikowane wyłącznie main i v1.1.1 wskazujące ten sam finalny commit. Mvp-v1.0 i v1.1.0 zachowane, bez force. Nie publikować INPUT/runs/transkrypcji/modeli/cache/local.toml. Cały osiągalny zakres publikacji jest kontrolowany przed push; working tree weryfikowany po operacjach.
 
-Rekomendacja Work: poprawka v1.1.1 gotowa do odbioru w opisanym zakresie. Odbiór, integracja z main, tag i publikacja wymagają osobnej decyzji użytkownika; nie rozpoczynano tych operacji.
+Dokładny pełny SHA main i commita tagu, obiekt tagu oraz wynik porównania ze zdalnym stanem: końcowe przekazanie i runs/release_1_1_1_a27c2caf26d14d78a01f8a9d5cbef213/release_refs.json. Po wykonaniu procedury odtworzenie przez git rev-parse main i git rev-parse 'v1.1.1^{commit}'; oba mają być zgodne z git ls-remote origin dla main i rozwiązanego tagu. URL commita ma postać adresu repozytorium + /commit/<pełny SHA>, tagu + /tree/v1.1.1. Końcowe przekazanie zawiera gotowe linki i wynik publikacji; nie zastępować go samym komunikatem utworzenia lokalnego tagu.
+
+[Stan](../../docs/CURRENT_STATE.md), [decyzje D-59–D-62](../../docs/DECISIONS.md), [metadane](../../docs/DATA.md), [testy](../../tests/README.md). Dowody finalizacji i logi pozostają tylko w podanym ignorowanym katalogu runs. Start.cmd bez zmian; do oceny wersji użyć nowego zadania, nie historycznego wyniku. Work nie zatwierdza własnego rezultatu i nie rozpoczyna kolejnej wersji.

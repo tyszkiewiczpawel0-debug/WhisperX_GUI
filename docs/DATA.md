@@ -11,7 +11,7 @@ Każda operacja tworzy nowy katalog data/czas + UUID, również inspekcja i przy
 
 run.json: identyfikator, status/etap, źródło, parametry, modele/revizje, wersje, GPU, hashe kodu, czas UTC i czas wykonania, rezultaty, błędy/ostrzeżenia. request.json zawiera tylko dozwolone pola konfiguracji. Nie zapisujemy tokenów ani całego środowiska. Log i metadane są prywatnymi danymi poza Git.
 
-Kandydat poprawki v1.1.1: nowe manifesty mają `application: "WHISPERX_GUI"` i `application_version: "1.1.1"`. Jedynym źródłem tych wartości są stałe APPLICATION_ID i APPLICATION_VERSION w istniejącym src/configuration.py; kontroler używa ich przy tworzeniu zadania i zachowuje pola w kolejnych stanach. Wersja aplikacji jest niezależna od wersji bibliotek w versions i od schema_version (nadal 1).
+Od poprawki v1.1.1: nowe manifesty mają `application: "WHISPERX_GUI"` i `application_version: "1.1.1"`. Jedynym źródłem tych wartości są stałe APPLICATION_ID i APPLICATION_VERSION w istniejącym src/configuration.py; kontroler używa ich przy tworzeniu zadania i zachowuje pola w kolejnych stanach. Wersja aplikacji jest niezależna od wersji bibliotek w versions i od schema_version (nadal 1).
 
 Historyczne manifesty mogą zawierać application="WHISPERX_GUI D2.1" bez application_version. Nie są migrowane ani ponownie zapisywane; czytanie starych wyników nie wymaga nowego pola. Dodanie metadanych nie zmienia request.json, transcript.json, TXT/SRT, dotychczasowych pól provenance ani ich znaczenia.
 
