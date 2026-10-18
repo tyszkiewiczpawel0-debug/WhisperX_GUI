@@ -109,6 +109,8 @@ class PromptTests(unittest.TestCase):
                 root.update()
                 expected = configuration.profile(app.profile_ids[index])
                 self.assertEqual(app.profile, expected)
+                self.assertEqual(app.profile['audio_timeline_mode'],
+                                 'legacy' if index == 0 else 'preserve')
                 self.assertEqual({k: v.get() for k, v in app.values.items()},
                                  {k: str(expected[k]) for k in app.values})
                 self.assertTrue(app.alignment.get())
@@ -119,6 +121,7 @@ class PromptTests(unittest.TestCase):
                 app.start('transcribe')
                 sent = app.controller.start.call_args.args[1]
                 self.assertEqual(sent['id'], 'sesja_rady_gminy')
+                self.assertEqual(sent['audio_timeline_mode'], 'preserve')
                 self.assertFalse(sent['alignment'])
                 self.assertEqual(str(app.profile_box['state']), 'disabled')
                 app.controller.active = True

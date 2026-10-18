@@ -32,8 +32,11 @@ Testy nie zastępują GUI atrapą i nie uruchamiają silnika. Błędne konfigura
 
 ## Kolejna wersja — dwa profile i opcjonalny preserve
 
-Dotychczasowe discover uruchamia teraz 22 testy (w tym 32 podprzypadki orkiestracji workera). Dodano: rejestr i zgodność ID pliku, domyślne wartości, bajtową zgodność webinarowego JSON z tagiem, walidację trybu, A → B → A i reset wszystkich pól w prawdziwym Tkinter, blokadę wyboru i przywrócenie dla stanów końcowych, snapshoty obu profili/trybów przez rzeczywisty worker, niezmienione polecenie legacy, syntetyczną przerwę PTS, odmowę nadpisania WAV i ograniczone ponowienie podmiany JSON przy blokadzie Windows. Atrapy ASR pozostają jawne. Czyszczenie cykli Tk w testach odbywa się w głównym wątku, aby nie trafiły do kolektora wątku kontrolera.
+Dotychczasowe discover uruchamia teraz 23 testy (w tym 32 podprzypadki orkiestracji workera). Dodano: rejestr i zgodność ID pliku, domyślne wartości, bajtową zgodność webinarowego JSON z tagiem, walidację trybu, A → B → A i reset wszystkich pól w prawdziwym Tkinter, blokadę wyboru i przywrócenie dla stanów końcowych, snapshoty obu profili/trybów przez rzeczywisty worker, niezmienione polecenie legacy, syntetyczną przerwę PTS, odmowę nadpisania WAV i ograniczone ponowienie podmiany JSON przy blokadzie Windows. Atrapy ASR pozostają jawne. Czyszczenie cykli Tk w testach odbywa się w głównym wątku, aby nie trafiły do kolektora wątku kontrolera.
 
 check_engine.py i check_cancellation.py przyjmują opcjonalnie po ścieżce próbki ID profilu i tryb audio, np. `'<krótka próbka.wav>' sesja_rady_gminy preserve`. Bez nowych argumentów nadal używają webinaru/legacy. Nie używaj pełnej sesji do testu silnika. check_exports.py dodatkowo sprawdza zachowanie słów z timestampami i bez nich w JSON.
 
 [Raport wykonania i AUDIO-01](../NEXT_VERSION_IMPLEMENTATION_PLAN.md#5-wykonanie-i-wyniki--18102026) odróżnia rzeczywisty krótki ASR, pomiary waveform, atrapy i niewykonane kontrole użytkownika. Dane i pełne logi pozostają poza Git w runs.
+
+
+Finalizacja v1.1.0: test wartości domyślnych oczekuje sesja=preserve, webinar=legacy i nadal brak pola=legacy. Dodatkowy test uruchamia rzeczywisty worker prepare dla obu profili bez nadpisania trybu oraz porównuje request/run i wykonane polecenie. Test przełączania GUI sprawdza także przeniesienie domyślnego trybu do parametrów zadania. W finalizacji nie powtarza się pełnej transkrypcji ani wcześniejszych pomiarów AUDIO-01; wyniki i odbiór użytkownika w sekcji 6 planu.

@@ -1,6 +1,6 @@
 # Analiza kolejnej wersji — 18.10.2026
 
-**Dokument historyczny analizy.** Późniejsze zlecenie użytkownika IMPLEMENTATION AUTHORIZED zastępuje oczekiwanie na zgodę poniżej. Wyniki implementacji i nowa obserwacja o pojedynczym AUDIO-01: [plan i raport](NEXT_VERSION_IMPLEMENTATION_PLAN.md#5-wykonanie-i-wyniki--18102026). W szczególności preserve jest opcjonalny, a oba dostarczone profile pozostają domyślnie legacy; wcześniejsza rekomendacja domyślnego preserve dla sesji nie została wdrożona.
+**Dokument historyczny analizy.** Późniejsze zlecenie użytkownika IMPLEMENTATION AUTHORIZED zastępuje oczekiwanie na zgodę poniżej. Wyniki implementacji i nowa obserwacja o pojedynczym AUDIO-01: [plan i raport](NEXT_VERSION_IMPLEMENTATION_PLAN.md#5-wykonanie-i-wyniki--18102026). W implementacji oba profile początkowo pozostały legacy; późniejsze zlecenie FINALIZATION AUTHORIZED zatwierdziło preserve jako domyślną konfigurację sesji w v1.1.0. Webinar i reguła brak pola → legacy pozostają bez zmian. Poniższy tekst opisuje historyczną analizę, a aktualny stan finalizacji podaje sekcja 6 planu.
 
 **ANALYSIS COMPLETE — IMPLEMENTATION PENDING APPROVAL**
 

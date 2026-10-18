@@ -9,5 +9,6 @@
   "batch_size": 8,
   "alignment": true,
   "diarization": false,
-  "initial_prompt": ""
+  "initial_prompt": "",
+  "audio_timeline_mode": "preserve"
 }

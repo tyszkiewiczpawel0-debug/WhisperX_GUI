@@ -1,6 +1,6 @@
 # Minimalny plan kolejnej wersji — 18.10.2026
 
-**IMPLEMENTATION COMPLETE — PENDING ACCEPTANCE**
+**RELEASE CANDIDATE READY — PENDING FINAL ACCEPTANCE**
 
 Zlecenie użytkownika IMPLEMENTATION AUTHORIZED z 18.10.2026 otworzyło wykonanie następnej wersji. Sekcje 1–4 poniżej zachowują plan sprzed zlecenia; rozstrzygające korekty i wyniki są w sekcji 5. Podstawa: [analiza](NEXT_VERSION_ANALYSIS.md). Zamknięte MVP i jego kontrakt pozostają punktem odniesienia; Work nie zatwierdza wyniku.
 
@@ -48,6 +48,8 @@ DoD implementacji nie oznacza własnego odbioru Work. Użytkownik i główna roz
 Obecnie wykonano tylko analizę i dokumenty; istniejące 16 testów, eksporty/blokady i AST/config PASS, szczegóły w analizie. Nie dodano profilu, pola `audio_timeline_mode`, filtra ani testów nowej funkcjonalności. Najbliższy krok to decyzja o powyższej rekomendacji i autoryzacji zakresu; aktualny [handoff](99_HANDOFF/CURRENT/HANDOFF.md) zawiera stan do kontynuacji.
 
 ## 5. Wykonanie i wyniki — 18.10.2026
+
+Stan historyczny przed finalizacją. Sekcja 6 podaje późniejszą decyzję o domyślnym trybie sesji i odbiór funkcjonalny użytkownika; nie zmieniamy pochodzenia wcześniejszych dowodów.
 
 ### Zakres i korekty planu
 
@@ -108,3 +110,18 @@ Dowody wyłącznie lokalne, ignorowane:
 - Anulowanie aktywnego FFmpeg: `runs/jobs/20261018_104834_501f98e0ab2543de9cc6ba34a29e0df9`.
 
 Testy nie usuwają własnych danych ani wcześniejszych wyników. Nagrania/transkrypcje/logi i lokalna konfiguracja nie trafiają do Git. Nie wykonano push ani zmiany tagu mvp-v1.0. Rekomendacja Work: gotowe do odbioru w powyższym zakresie, z jawnymi NOT TESTED i trzema historycznymi PARTIAL MVP; decyzja należy do użytkownika i głównej rozmowy.
+
+
+## 6. Finalizacja i odbiór funkcjonalny — 18.10.2026
+
+**RELEASE CANDIDATE READY — PENDING FINAL ACCEPTANCE**
+
+Zlecenie FINALIZATION AUTHORIZED zatwierdza lokalną finalizację po pozytywnym odbiorze funkcjonalnym GUI. Jedyna zmiana działania od commita d446143 to pole audio_timeline_mode=preserve w config/sesja_rady_gminy.json. WEBINAR_RUI_PL domyślnie legacy i bajtowo identyczny z mvp-v1.0 (SHA-256 0a105a685318261883b948f1e622b67a2fe31a710c2d5f3b5915c22e4c4baaf7). Brak pola nadal oznacza legacy. Nie zmieniono kodu src, kontraktu wynikowego, walidacji legacy|preserve, przełączników GUI, środowiska ani modeli.
+
+**Potwierdzone przez użytkownika:** GUI uruchamia się, oba profile są dostępne, przełączenie resetuje parametry, interfejs jest responsywny podczas rzeczywistego WhisperX, pełny AUDIO-01 ma succeeded oraz wymagane eksporty i metadane. Ten test używał **legacy** i zgłosił −405 ms; nie jest pełnym testem preserve. Dodatkowo odczyt samego run.json potwierdził profil sesji, succeeded, legacy i −0,405 s oraz obecność wymaganych plików w runs/jobs/20261018_110836_9aeb60370a554010b1df99798e1486a8. Nie czytano treści transkrypcji. Ocena responsywności pochodzi od użytkownika, nie z pomiaru Work.
+
+Weryfikacja finalizacyjna: **23/23 unittest PASS**, 6,585 s na gałęzi roboczej, eksporty i blokady offline/zapisu PASS. Rozszerzono istniejące testy: oba defaulty, brak pola=legacy, A → B → A z poprawnym trybem i resetem pól, snapshoty request/run i faktyczny tryb realnego workera prepare bez nadpisania. Zachowano regresję obu trybów, anulowania, Job Object, promptu i formatów wyników. ASR w jednostkowych testach orkiestracji jest atrapą; finalizacja nie uruchamia ponownie modeli ani długiego ASR. Walidacja konfiguracji, AST i zgodność dokumentów oraz końcowa kontrola main są częścią zamknięcia tego checkpointu.
+
+Zachowano wcześniejsze dowody synchronizacji pięciu zdarzeń i krótkiego ASR preserve (sekcja 5), bez powtarzania kosztownego przebiegu. Pełna transkrypcja 98 min w preserve, całościowy odsłuch/lip-sync i ocena wszystkich słów pozostają **NOT TESTED**. Nadal nie zweryfikowano drugiego stanowiska, CPU/innych compute ani ponownie realnego anulowania ASR/alignmentu. Historycznych trzech PARTIAL MVP w tagu mvp-v1.0 nie przepisujemy; nowy odbiór GUI stanowi osobny dowód dla kolejnej wersji.
+
+Punkt wejścia: czyste codex/multiple-profiles / d446143ce5ff9074bfc3b119170d4fcfe5ade472, main i mvp-v1.0 na a677fc6f62620752156fd2565edac6e3585090e0, jedyny zastany tag mvp-v1.0. Dopuszczona lokalna finalizacja to commit zmian konfiguracji/testów/dokumentów, integracja z main bez utraty historii i tag v1.1.0 (brak kolizji nazw). Dokładne końcowe identyfikatory main/tag i czystość potwierdza końcowe przekazanie oraz lokalny protokół runs/finalization_2e0513d7a00f425cb68da196ff457360. Bez push i publikacji, bez nowego rozwoju funkcjonalnego. Work nie zatwierdza wydania.

@@ -2,7 +2,7 @@
 
 Lokalne GUI Tkinter do przygotowania i transkrypcji pojedynczego nagrania. Profile WEBINAR_RUI_PL i sesja_rady_gminy, bez diarizacji, streszczeń i kolejki.
 
-**Kolejna wersja: IMPLEMENTATION COMPLETE — PENDING ACCEPTANCE.** [Zakres, wyniki testów i AUDIO-01](NEXT_VERSION_IMPLEMENTATION_PLAN.md#5-wykonanie-i-wyniki--18102026). Zamknięte MVP pozostaje punktem odniesienia w tagu mvp-v1.0.
+**v1.1.0: RELEASE CANDIDATE READY — PENDING FINAL ACCEPTANCE.** [Zakres, wyniki testów i AUDIO-01](NEXT_VERSION_IMPLEMENTATION_PLAN.md#5-wykonanie-i-wyniki--18102026). Zamknięte MVP pozostaje punktem odniesienia w tagu mvp-v1.0.
 
 **MVP v1 CLOSED / D4 APPROVED — decyzja użytkownika z 14.10.2026.** [Ocena MVP: 6 PASS, 3 PARTIAL, 0 FAIL](docs/D4_MVP_REVIEW.md). Trzy PARTIAL pozostają: pełny przebieg sterowany przez widoczne GUI, pomiar responsywności podczas silnika i test drugiego stanowiska. [Raport D3](docs/D3_PILOT_REPORT.md). Dowody: [raport D2.1](docs/D2_1_TEST_REPORT.md), [raport D2](docs/D2_TEST_REPORT.md), [stan](docs/CURRENT_STATE.md), [handoff](99_HANDOFF/CURRENT/HANDOFF.md).
 
@@ -26,9 +26,11 @@ Przygotowanie: PCM s16le / 16 kHz / mono. Próg ostrzeżenia długości 0,1 s je
 
 Model large-v3 i język pl są stałe dla obu profili. Można zmieniać urządzenie cuda/cpu, float16/float32/int8, batch 1–64 i alignment. CPU z float16 jest odrzucany. Nie ma automatycznej zmiany parametrów po błędzie. CPU i alternatywne typy obliczeń nie przeszły pełnego testu D2.
 
-Opcjonalne pole profilu `audio_timeline_mode` przyjmuje `legacy` albo `preserve`; brak oznacza `legacy`, inna wartość to błąd. Oba dostarczone profile zachowują legacy. Preserve dodaje filtr FFmpeg `aresample=16000:async=1:first_pts=0`, a wybrany tryb i faktyczne polecenie zapisuje w wynikach. Nie ma automatycznego przełączenia ani przycisku tego trybu w GUI.
+Opcjonalne pole profilu `audio_timeline_mode` przyjmuje `legacy` albo `preserve`; brak oznacza `legacy`, inna wartość to błąd. Profil sesji domyślnie wybiera preserve, a webinar pozostaje legacy (jego JSON jest bajtowo niezmieniony). Preserve dodaje filtr FFmpeg `aresample=16000:async=1:first_pts=0`, a wybrany tryb i faktyczne polecenie zapisuje w wynikach. Nie ma automatycznego przełączenia ani przycisku tego trybu w GUI.
 
-**AUDIO-01:** zwykłe przygotowanie przesuwa sprawdzone zdarzenia o 109–405 ms; dla tego materiału zalecany jest jawny preserve. Aby użyć go z GUI, przed uruchomieniem aplikacji dodaj do `config/sesja_rady_gminy.json` pole `"audio_timeline_mode": "preserve"` (z poprawnym przecinkiem między polami). Jest to ręczna, trwała konfiguracja kolejnych zadań tego profilu; GUI jej nie zapisuje. Po zmianie pliku uruchom aplikację ponownie. Aby wrócić do domyślnej metody, usuń to pole albo wpisz legacy. Wyniki i ograniczenia pomiaru opisuje plan; filtr nie gwarantuje synchronizacji dowolnego pliku.
+**AUDIO-01:** zwykłe przygotowanie przesuwa sprawdzone zdarzenia o 109–405 ms. W tej wersji wystarczy wybrać profil sesji, aby użyć preserve; ręczna edycja JSON nie jest potrzebna. Brak pola audio_timeline_mode nadal oznacza legacy, niezależnie od ID profilu. GUI nie zapisuje plików profili ani nie udostępnia przełącznika trybu audio. Wyniki i ograniczenia pomiaru opisuje plan; filtr nie gwarantuje synchronizacji dowolnego pliku.
+
+Użytkownik potwierdził uruchomienie GUI, oba profile, reset parametrów i responsywność podczas rzeczywistego WhisperX oraz pełną transkrypcję AUDIO-01 z kompletem wyników. Ten przebieg używał legacy i zgłosił −405 ms. Nie jest dowodem pełnej transkrypcji w preserve; dla preserve zachowano wcześniejszy pomiar pięciu zdarzeń i krótki rzeczywisty ASR. Szczegóły finalizacji: [raport](NEXT_VERSION_IMPLEMENTATION_PLAN.md#6-finalizacja-i-odbiór-funkcjonalny--18102026).
 
 Opcjonalne pole JSON `initial_prompt` przyjmuje tekst albo null. Brak pola, null, pusty tekst lub same białe znaki oznaczają brak promptu. Dostarczony profil ma pustą wartość. Niepusty tekst jest przekazywany bez zmian i zapisywany w metadanych; biblioteka usuwa skrajne białe znaki przed tokenizacją i wykorzystuje najwyżej ostatnie 223 tokeny promptu. Stosuj krótki kontekst lub terminologię; prompt nie gwarantuje poprawnej transkrypcji. Szczegóły zapisu przy błędzie/anulowaniu: [dane](docs/DATA.md).
 

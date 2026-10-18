@@ -51,17 +51,21 @@ class MVP(unittest.TestCase):
             with self.assertRaises(ValueError):
                 configuration.parameters(p | changes)
 
-    def test_profiles_and_legacy_defaults(self):
+    def test_profiles_and_audio_defaults(self):
         self.assertEqual(configuration.profile(), configuration.profile('WEBINAR_RUI_PL'))
+        self.assertEqual(configuration.profile()['audio_timeline_mode'], 'legacy')
         baseline = subprocess.check_output(['git', 'show', 'mvp-v1.0:config/WEBINAR_RUI_PL.json'], cwd=ROOT)
         self.assertEqual((ROOT / 'config/WEBINAR_RUI_PL.json').read_bytes(), baseline)
         p = configuration.profile('sesja_rady_gminy')
         expected = {'id': 'sesja_rady_gminy', 'model': 'large-v3', 'language': 'pl', 'device': 'cuda',
                     'compute_type': 'float16', 'batch_size': 8, 'alignment': True, 'diarization': False,
-                    'initial_prompt': None, 'audio_timeline_mode': 'legacy'}
+                    'initial_prompt': None, 'audio_timeline_mode': 'preserve'}
         for key, value in expected.items():
             self.assertEqual(p[key], value)
         self.assertFalse(configuration.parameters(p | {'alignment': False})['alignment'])
+        without_mode = dict(p)
+        without_mode.pop('audio_timeline_mode')
+        self.assertEqual(configuration.parameters(without_mode)['audio_timeline_mode'], 'legacy')
         for ident in ('unknown', '../WEBINAR_RUI_PL', None, []):
             with self.assertRaises(ValueError):
                 configuration.profile(ident)
@@ -101,6 +105,20 @@ class MVP(unittest.TestCase):
                     self.assertEqual(manifest['initial_prompt_state'], 'not_submitted')
                     self.assertNotIn('profile_id', manifest)
         self.assertEqual(before, [path.read_bytes() for path in paths])
+
+    def test_default_profile_modes_in_snapshots(self):
+        for ident, mode in [('WEBINAR_RUI_PL', 'legacy'), ('sesja_rady_gminy', 'preserve')]:
+            with self.subTest(profile=ident):
+                c = Controller(self.config)
+                run = c.start(self.audio, configuration.profile(ident), 'prepare')
+                manifest = self.wait(c)
+                request = json.loads((run / 'request.json').read_text(encoding='utf-8'))
+                self.assertEqual(manifest['status'], 'prepared', manifest.get('error'))
+                self.assertEqual(request['parameters'], manifest['parameters'])
+                self.assertEqual(request['parameters']['id'], ident)
+                self.assertEqual(request['parameters']['audio_timeline_mode'], mode)
+                self.assertEqual(manifest['preparation']['audio_timeline_mode'], mode)
+                self.assertEqual('-af' in manifest['preparation']['command'], mode == 'preserve')
 
     def test_legacy_command_and_invalid_preparation_mode(self):
         info = media.probe(self.config, self.audio)

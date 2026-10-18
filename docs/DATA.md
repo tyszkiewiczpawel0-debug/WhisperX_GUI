@@ -33,7 +33,7 @@ Stan accepted_by_engine nie gwarantuje wygenerowania segmentów ani jakości uż
 
 parameters.id w request.json i run.json identyfikuje WEBINAR_RUI_PL albo sesja_rady_gminy. Nie ma dodatkowego profile_id. Schema_version pozostaje 1; rozszerzenia są addytywne. Pusty prompt obu profili nadal normalizowany jest do null.
 
-parameters.audio_timeline_mode zapisuje wybrany tryb legacy/preserve, także gdy przygotowania jeszcze nie wykonano. Brak pola w starszym request oznacza legacy. Domyślny profil sesji nie wymusza preserve.
+parameters.audio_timeline_mode zapisuje wybrany tryb legacy/preserve, także gdy przygotowania jeszcze nie wykonano. Brak pola w starszym request oznacza legacy. Od finalizacji v1.1.0 profil sesji zawiera jawne audio_timeline_mode=preserve. Webinar pozostaje legacy; jego JSON bez zmiany bajtów. Brak pola nadal oznacza legacy także dla starszych requestów sesji; worker nie zastępuje snapshotu nowymi wartościami domyślnymi z pliku profilu.
 
 Po udanym przygotowaniu preparation zawiera dodatkowo:
 
