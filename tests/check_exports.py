@@ -1,5 +1,6 @@
 """Real WhisperX writers and offline guard; no engine/model load."""
 from pathlib import Path
+import json
 import os
 import subprocess
 import sys
@@ -34,8 +35,11 @@ else:
     from artifacts import export
     assert format_timestamp(59.9996, True, ',') == '00:01:00,000'
     assert format_timestamp(3599.9996, True, ',') == '01:00:00,000'
-    result = {'language': 'pl', 'segments': [{'start': 59.9996, 'end': 61, 'text': 'Próba polskiego tekstu.'}]}
+    result = {'language': 'pl', 'segments': [{'start': 59.9996, 'end': 61, 'text': 'Próba polskiego tekstu.',
+               'words': [{'word': 'Próba', 'start': 59.9996, 'end': 60.3}, {'word': 'polskiego', 'start': 60.3, 'end': 61},
+                         {'word': 'tekstu.'}]}]}
     export(result, run, 62)
     assert '00:01:00,000 --> 00:01:01,000' in (run / 'transcript.srt').read_text(encoding='utf-8')
     assert 'Próba' in (run / 'transcript.txt').read_text(encoding='utf-8')
+    assert json.loads((run / 'transcript.json').read_text(encoding='utf-8')) == result
     print('PASS: real TXT/SRT/JSON exports and minute/hour rollover')

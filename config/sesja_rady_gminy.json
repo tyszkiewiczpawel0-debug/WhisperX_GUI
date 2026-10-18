@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "id": "sesja_rady_gminy",
+  "name": "Sesja Rady Gminy — PL",
+  "model": "large-v3",
+  "language": "pl",
+  "device": "cuda",
+  "compute_type": "float16",
+  "batch_size": 8,
+  "alignment": true,
+  "diarization": false,
+  "initial_prompt": ""
+}

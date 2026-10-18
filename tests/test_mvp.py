@@ -1,5 +1,6 @@
 """Local integration tests; no installs/downloads. Run with the configured Python -B."""
 import json
+import gc
 from pathlib import Path
 import subprocess
 import sys
@@ -7,6 +8,7 @@ import time
 import unittest
 import uuid
 import wave
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
@@ -18,6 +20,10 @@ from winjob import Job
 
 
 class MVP(unittest.TestCase):
+    def tearDown(self):
+        # Tk cycles must be finalized on the GUI thread, before another worker starts.
+        gc.collect()
+
     @classmethod
     def setUpClass(cls):
         cls.config = configuration.load()
@@ -44,6 +50,130 @@ class MVP(unittest.TestCase):
                         {'device': 'cpu', 'compute_type': 'float16'}, {'model': 'tiny'}):
             with self.assertRaises(ValueError):
                 configuration.parameters(p | changes)
+
+    def test_profiles_and_legacy_defaults(self):
+        self.assertEqual(configuration.profile(), configuration.profile('WEBINAR_RUI_PL'))
+        baseline = subprocess.check_output(['git', 'show', 'mvp-v1.0:config/WEBINAR_RUI_PL.json'], cwd=ROOT)
+        self.assertEqual((ROOT / 'config/WEBINAR_RUI_PL.json').read_bytes(), baseline)
+        p = configuration.profile('sesja_rady_gminy')
+        expected = {'id': 'sesja_rady_gminy', 'model': 'large-v3', 'language': 'pl', 'device': 'cuda',
+                    'compute_type': 'float16', 'batch_size': 8, 'alignment': True, 'diarization': False,
+                    'initial_prompt': None, 'audio_timeline_mode': 'legacy'}
+        for key, value in expected.items():
+            self.assertEqual(p[key], value)
+        self.assertFalse(configuration.parameters(p | {'alignment': False})['alignment'])
+        for ident in ('unknown', '../WEBINAR_RUI_PL', None, []):
+            with self.assertRaises(ValueError):
+                configuration.profile(ident)
+            with self.assertRaises(ValueError):
+                configuration.parameters(p | {'id': ident})
+        for mode in ('automatic', None, True, []):
+            with self.assertRaises(ValueError):
+                configuration.parameters(p | {'audio_timeline_mode': mode})
+        fake = self.folder / 'mismatched_profile'
+        (fake / 'config').mkdir(parents=True)
+        (fake / 'config/sesja_rady_gminy.json').write_text(json.dumps(configuration.profile()), encoding='utf-8')
+        with patch.object(configuration, 'ROOT', fake), self.assertRaisesRegex(ValueError, 'Identyfikator'):
+            configuration.profile('sesja_rady_gminy')
+
+    def test_profile_snapshots_and_preparation_modes(self):
+        paths = [ROOT / 'config' / name for name in configuration.PROFILES.values()]
+        before = [path.read_bytes() for path in paths]
+        for ident in configuration.PROFILES:
+            for mode in ('legacy', 'preserve'):
+                with self.subTest(profile=ident, mode=mode):
+                    p = configuration.profile(ident) | {'batch_size': 2, 'alignment': False,
+                                                      'initial_prompt': 'tylko ten run', 'audio_timeline_mode': mode}
+                    c = Controller(self.config)
+                    run = c.start(self.audio, p, 'prepare')
+                    p.update(id='changed', batch_size=64, initial_prompt='changed', audio_timeline_mode='changed')
+                    manifest = self.wait(c)
+                    request = json.loads((run / 'request.json').read_text(encoding='utf-8'))
+                    self.assertEqual(manifest['status'], 'prepared', manifest.get('error'))
+                    self.assertEqual(request['parameters'], manifest['parameters'])
+                    self.assertEqual(manifest['parameters']['id'], ident)
+                    self.assertEqual(manifest['parameters']['batch_size'], 2)
+                    self.assertFalse(manifest['parameters']['alignment'])
+                    self.assertEqual(manifest['parameters']['initial_prompt'], 'tylko ten run')
+                    self.assertEqual(manifest['parameters']['audio_timeline_mode'], mode)
+                    self.assertEqual(manifest['preparation']['audio_timeline_mode'], mode)
+                    self.assertEqual('-af' in manifest['preparation']['command'], mode == 'preserve')
+                    self.assertEqual(manifest['initial_prompt_state'], 'not_submitted')
+                    self.assertNotIn('profile_id', manifest)
+        self.assertEqual(before, [path.read_bytes() for path in paths])
+
+    def test_legacy_command_and_invalid_preparation_mode(self):
+        info = media.probe(self.config, self.audio)
+        target = self.folder / 'command_only.wav'
+        with patch('media.command') as command, patch('media.probe', return_value=info | {'sample_rate': '16000', 'channels': 1}):
+            prepared = media.prepare(self.config, self.audio, info, target)
+            self.assertEqual(command.call_args.args[0], [self.config['runtime']['ffmpeg'], '-nostdin', '-n',
+                '-v', 'error', '-i', str(self.audio), '-map', f"0:{info['stream_index']}", '-vn',
+                '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', str(target)])
+            self.assertEqual(prepared['audio_timeline_mode'], 'legacy')
+            command.reset_mock()
+            with self.assertRaises(ValueError):
+                media.prepare(self.config, self.audio, info, target, 'unknown')
+            command.assert_not_called()
+
+    def test_manifest_transient_and_permanent_windows_lock(self):
+        target = self.folder / 'manifest_lock.json'
+        artifacts.save(target, {'status': 'before'})
+        original_replace = Path.replace
+        errors = []
+        for code in (5, 32):
+            error = PermissionError('simulated Windows lock')
+            error.winerror = code
+            errors.append(error)
+
+        def replace(source, destination):
+            if errors:
+                raise errors.pop(0)
+            return original_replace(source, destination)
+
+        with patch.object(Path, 'replace', autospec=True, side_effect=replace) as retry, patch('artifacts.time.sleep'):
+            artifacts.save(target, {'status': 'after'})
+            self.assertEqual(retry.call_count, 3)
+        self.assertEqual(json.loads(target.read_text()), {'status': 'after'})
+        permanent = PermissionError('permanent lock')
+        permanent.winerror = 5
+        with patch.object(Path, 'replace', side_effect=permanent) as retry, patch('artifacts.time.sleep'):
+            with self.assertRaises(PermissionError):
+                artifacts.save(target, {'status': 'must not replace'})
+            self.assertEqual(retry.call_count, 5)
+        self.assertEqual(json.loads(target.read_text()), {'status': 'after'})
+        self.assertTrue(target.with_suffix('.tmp').exists())
+        with patch.object(Path, 'replace', side_effect=OSError('different error')) as retry:
+            with self.assertRaises(OSError):
+                artifacts.save(target, {'status': 'different error'})
+            self.assertEqual(retry.call_count, 1)
+
+    def test_preserve_timestamp_gap_and_no_overwrite(self):
+        # A controlled PTS gap verifies the filter, not the cause of AUDIO-01's AAC issue.
+        source = self.folder / 'pts_gap.mkv'
+        media.command([self.config['runtime']['ffmpeg'], '-nostdin', '-n', '-v', 'error',
+                       '-f', 'lavfi', '-i', 'sine=frequency=730:sample_rate=16000:duration=2',
+                       '-af', 'aselect=not(between(t\\,0.5\\,0.75))', '-c:a', 'pcm_s16le', source])
+        meta = media.probe(self.config, source)
+        legacy = self.folder / 'gap_legacy.wav'
+        preserve = self.folder / 'gap_preserve.wav'
+        a = media.prepare(self.config, source, meta, legacy)
+        b = media.prepare(self.config, source, meta, preserve, 'preserve')
+        self.assertGreater(b['metadata']['duration'] - a['metadata']['duration'], 0.2)
+        self.assertAlmostEqual(b['metadata']['duration'], 2, places=3)
+        import array
+        with wave.open(str(preserve), 'rb') as w:
+            w.setpos(9600)
+            gap = array.array('h', w.readframes(1600))
+        with wave.open(str(legacy), 'rb') as w:
+            w.setpos(9600)
+            tone = array.array('h', w.readframes(1600))
+        self.assertEqual(max(abs(x) for x in gap), 0)
+        self.assertGreater(max(abs(x) for x in tone), 1000)
+        before = preserve.read_bytes()
+        with self.assertRaises(FileExistsError):
+            media.prepare(self.config, source, meta, preserve, 'preserve')
+        self.assertEqual(preserve.read_bytes(), before)
 
     def test_media_validation(self):
         for streams in ([], [{'codec_type': 'video'}],
@@ -186,6 +316,8 @@ class MVP(unittest.TestCase):
         self.assertFalse(app.controller.active)
         self.assertGreater(len(ticks), 2)
         self.assertLess(max(b - a for a, b in zip(ticks, ticks[1:])), 0.5)
+        for callback in root.tk.call('after', 'info'):
+            root.after_cancel(callback)
         root.destroy()
 
 

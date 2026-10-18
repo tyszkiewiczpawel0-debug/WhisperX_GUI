@@ -68,7 +68,7 @@ def main():
                                              for tool in ('ffmpeg', 'ffprobe')})
             stage('prepare')
             wav = run / 'work/audio.wav'
-            prepared = media.prepare(c, source, meta, wav)
+            prepared = media.prepare(c, source, meta, wav, p['audio_timeline_mode'])
             manifest['preparation'] = prepared
             manifest['warnings'].extend(prepared['warnings'])
             for warning in prepared['warnings']:

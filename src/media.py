@@ -1,7 +1,8 @@
-"""Thin FFprobe / FFmpeg wrappers. No custom decoder or timestamp correction."""
+"""Thin FFprobe / FFmpeg wrappers; timestamp matching is explicit and opt-in."""
 import json
 import math
 import subprocess
+from pathlib import Path
 
 FLAGS = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
 
@@ -43,7 +44,7 @@ def inspect_data(data):
         if start is not None and abs(start) > 0.1:
             raise ValueError(f'Nietypowy offset {label}: {start}s. MVP nie koryguje synchronizacji automatycznie.')
         if start:
-            warnings.append(f'Offset {label} {start}s; napisy względem początku zdekodowanego audio, bez korekty.')
+            warnings.append(f'Offset {label} {start}s; wymagana kontrola synchronizacji po przygotowaniu audio.')
     return {'format': fmt.get('format_name'), 'codec': stream.get('codec_name'),
             'sample_rate': stream.get('sample_rate'), 'channels': stream.get('channels'),
             'duration': duration, 'duration_source': origin, 'stream_index': stream['index'],
@@ -56,10 +57,17 @@ def probe(c, source):
                                            '-show_streams', '-of', 'json', source], timeout=60)))
 
 
-def prepare(c, source, metadata, target):
+def prepare(c, source, metadata, target, timeline_mode='legacy'):
+    if timeline_mode not in ('legacy', 'preserve'):
+        raise ValueError('Tryb osi czasu audio: legacy albo preserve.')
+    if Path(target).exists():
+        raise FileExistsError(target)
     args = [c['runtime']['ffmpeg'], '-nostdin', '-n', '-v', 'error', '-i', str(source),
             '-map', f"0:{metadata['stream_index']}", '-vn', '-acodec', 'pcm_s16le',
-            '-ar', '16000', '-ac', '1', str(target)]
+            '-ar', '16000', '-ac', '1']
+    if timeline_mode == 'preserve':
+        args += ['-af', 'aresample=16000:async=1:first_pts=0']
+    args.append(str(target))
     command(args)
     result = probe(c, target)
     if result['codec'] != 'pcm_s16le' or str(result['sample_rate']) != '16000' or result['channels'] != 1:
@@ -68,4 +76,13 @@ def prepare(c, source, metadata, target):
     warnings = []
     if delta is not None and abs(delta) > c['processing']['duration_warning_seconds']:
         warnings.append(f'Różnica długości WAV–wejście: {delta:+.6f}s. Wymagana kontrola synchronizacji.')
-    return {'command': args, 'metadata': result, 'duration_delta_seconds': delta, 'warnings': warnings}
+    container = number(metadata.get('ffprobe', {}).get('format', {}).get('duration'))
+    container_delta = None if container is None else result['duration'] - container
+    if timeline_mode == 'preserve' and container_delta is not None and abs(container_delta) > c['processing']['duration_warning_seconds']:
+        warnings.append(f'Różnica długości WAV–kontener: {container_delta:+.6f}s. Wymagana kontrola synchronizacji.')
+    return {'command': args, 'metadata': result, 'duration_delta_seconds': delta, 'warnings': warnings,
+            'audio_timeline_mode': timeline_mode,
+            'timeline_reference': 'source_timestamps_zero' if timeline_mode == 'preserve' else 'decoded_audio_start',
+            'source_audio_duration_seconds': metadata['duration'] if metadata['duration_source'] == 'stream' else None,
+            'source_container_duration_seconds': container,
+            'container_duration_delta_seconds': container_delta}

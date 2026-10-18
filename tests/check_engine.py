@@ -9,7 +9,10 @@ from configuration import load, profile
 from controller import Controller
 
 c = Controller(load())
-run = c.start(sys.argv[1], profile())
+params = profile(sys.argv[2]) if len(sys.argv) > 2 else profile()
+if len(sys.argv) > 3:
+    params['audio_timeline_mode'] = sys.argv[3]
+run = c.start(sys.argv[1], params)
 print(run, flush=True)
 try:
     while c.active or not c.events.empty():

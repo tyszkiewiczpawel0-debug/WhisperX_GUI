@@ -11,7 +11,10 @@ from controller import Controller
 
 for target in ('asr', 'alignment'):
     c = Controller(load())
-    run = c.start(sys.argv[1], profile())
+    params = profile(sys.argv[2]) if len(sys.argv) > 2 else profile()
+    if len(sys.argv) > 3:
+        params['audio_timeline_mode'] = sys.argv[3]
+    run = c.start(sys.argv[1], params)
     deadline = time.monotonic() + 180
     cancelled = False
     while c.active and time.monotonic() < deadline:

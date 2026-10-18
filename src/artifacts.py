@@ -1,7 +1,9 @@
 import json
 import math
+import os
 from pathlib import Path
 import re
+import time
 
 REQUIRED = ('transcript.txt', 'transcript.srt', 'transcript.json', 'run.json', 'process.log')
 
@@ -10,7 +12,16 @@ def save(path, value):
     path = Path(path)
     temp = path.with_suffix('.tmp')
     temp.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False), encoding='utf-8')
-    temp.replace(path)
+    for attempt in range(5):
+        try:
+            temp.replace(path)
+            return
+        except PermissionError as exc:
+            # Windows readers/scanners can briefly hold the destination open.
+            # Keep the previous JSON intact; never delete it to force a replace.
+            if os.name != 'nt' or getattr(exc, 'winerror', None) not in (5, 32, 33) or attempt == 4:
+                raise
+            time.sleep(0.02 * 2 ** attempt)
 
 
 def validate(result, duration):

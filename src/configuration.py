@@ -5,11 +5,13 @@ from pathlib import Path
 import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
+PROFILES = {'WEBINAR_RUI_PL': 'WEBINAR_RUI_PL.json',
+            'sesja_rady_gminy': 'sesja_rady_gminy.json'}
 
 
 def parameters(value):
     p = dict(value)
-    if p.get('id') != 'WEBINAR_RUI_PL' or p.get('schema_version') != 1:
+    if not isinstance(p.get('id'), str) or p['id'] not in PROFILES or p.get('schema_version') != 1:
         raise ValueError('Nieobsługiwany profil.')
     if p.get('model') != 'large-v3' or p.get('language') != 'pl':
         raise ValueError('MVP obsługuje lokalny large-v3 i język pl.')
@@ -27,6 +29,10 @@ def parameters(value):
     if prompt is not None and not isinstance(prompt, str):
         raise ValueError('Prompt transkrypcji musi być tekstem albo null.')
     p['initial_prompt'] = prompt if prompt and prompt.strip() else None
+    mode = p.get('audio_timeline_mode', 'legacy')
+    if mode not in ('legacy', 'preserve'):
+        raise ValueError('Tryb osi czasu audio: legacy albo preserve.')
+    p['audio_timeline_mode'] = mode
     return p
 
 
@@ -63,5 +69,10 @@ def load(path=ROOT / 'config/local.toml'):
             'processing': {'duration_warning_seconds': threshold}}
 
 
-def profile():
-    return parameters(json.loads((ROOT / 'config/WEBINAR_RUI_PL.json').read_text(encoding='utf-8')))
+def profile(ident='WEBINAR_RUI_PL'):
+    if not isinstance(ident, str) or ident not in PROFILES:
+        raise ValueError('Nieobsługiwany profil.')
+    value = json.loads((ROOT / 'config' / PROFILES[ident]).read_text(encoding='utf-8'))
+    if value.get('id') != ident:
+        raise ValueError('Identyfikator profilu nie odpowiada plikowi konfiguracji.')
+    return parameters(value)

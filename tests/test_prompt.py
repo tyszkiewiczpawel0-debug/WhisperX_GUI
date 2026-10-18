@@ -1,5 +1,6 @@
 """D2.1 targeted checks: real Tk/controller and isolated engine/worker boundaries."""
 import contextlib
+import gc
 import io
 import json
 from pathlib import Path
@@ -10,6 +11,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 import uuid
+from itertools import product
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
@@ -23,6 +25,10 @@ PROMPT = '  Rejestr Urbanistyczny.\nŻółć, RUI.\n'
 
 
 class PromptTests(unittest.TestCase):
+    def tearDown(self):
+        # Do not leave Tcl objects for collection by a later controller thread.
+        gc.collect()
+
     @classmethod
     def setUpClass(cls):
         cls.folder = ROOT / 'runs' / ('prompt_test_' + uuid.uuid4().hex)
@@ -69,8 +75,8 @@ class PromptTests(unittest.TestCase):
                 root.destroy()
 
     def test_adapter_exact_options_and_unchanged_transcribe(self):
-        for prompt in (None, PROMPT):
-            p = configuration.profile() | {'initial_prompt': prompt, 'alignment': False}
+        for ident, prompt in product(configuration.PROFILES, (None, PROMPT)):
+            p = configuration.profile(ident) | {'initial_prompt': prompt, 'alignment': False}
             model = Mock()
             model.transcribe.return_value = {'segments': []}
             wx = SimpleNamespace(load_audio=Mock(return_value='audio'), load_model=Mock(return_value=model))
@@ -83,19 +89,70 @@ class PromptTests(unittest.TestCase):
             model.transcribe.assert_called_once_with('audio', batch_size=8)
             self.assertEqual(stages, ['asr_loading', 'asr'])
 
+    def test_gui_profile_switch_reset_and_completion(self):
+        paths = [ROOT / 'config' / name for name in configuration.PROFILES.values()]
+        before = [path.read_bytes() for path in paths]
+        root = tk.Tk()
+        root.withdraw()
+        try:
+            app = App(root, self.config)
+            self.assertEqual(app.profile['id'], 'WEBINAR_RUI_PL')
+            self.assertEqual(len(app.profile_box['values']), 2)
+            for index in (1, 0, 1):
+                for value in app.values.values():
+                    value.set('overridden')
+                app.alignment.set(False)
+                app.prompt.delete('1.0', 'end')
+                app.prompt.insert('1.0', PROMPT)
+                app.profile_box.current(index)
+                app.profile_box.event_generate('<<ComboboxSelected>>')
+                root.update()
+                expected = configuration.profile(app.profile_ids[index])
+                self.assertEqual(app.profile, expected)
+                self.assertEqual({k: v.get() for k, v in app.values.items()},
+                                 {k: str(expected[k]) for k in app.values})
+                self.assertTrue(app.alignment.get())
+                self.assertEqual(app.prompt.get('1.0', 'end-1c'), '')
+            for status in ('succeeded', 'failed', 'cancelled', 'fatal'):
+                app.controller.start = Mock(return_value=self.folder)
+                app.alignment.set(False)
+                app.start('transcribe')
+                sent = app.controller.start.call_args.args[1]
+                self.assertEqual(sent['id'], 'sesja_rady_gminy')
+                self.assertFalse(sent['alignment'])
+                self.assertEqual(str(app.profile_box['state']), 'disabled')
+                app.controller.active = True
+                app.profile_box.current(0)
+                app.change_profile()
+                self.assertEqual(app.profile_box.current(), 1)
+                self.assertEqual(app.profile['id'], 'sesja_rady_gminy')
+                app.controller.active = False
+                if status == 'fatal':
+                    app.controller.events.put(('fatal', 'expected failure'))
+                else:
+                    app.controller.events.put(('done', {'status': status, 'warnings': [], 'error': None}))
+                app.poll()
+                self.assertEqual(str(app.profile_box['state']), 'readonly')
+                self.assertEqual(str(app.cancel_button['state']), 'disabled')
+            self.assertEqual(before, [path.read_bytes() for path in paths])
+        finally:
+            for callback in root.tk.call('after', 'info'):
+                root.after_cancel(callback)
+            root.destroy()
+
     def test_worker_manifest_success_and_errors(self):
         # Run the actual worker orchestration, replacing expensive external work.
         # Observe persisted stages as well as final JSON; controller cancellation
         # preserves these same fields after a worker is killed.
-        for prompt in (None, PROMPT):
+        for ident, prompt, timeline_mode in product(configuration.PROFILES, (None, PROMPT), ('legacy', 'preserve')):
             for failure in (None, 'before_loading', 'loading', 'asr'):
-                with self.subTest(prompt=prompt, failure=failure):
+                with self.subTest(profile=ident, mode=timeline_mode, prompt=prompt, failure=failure):
                     run = self.folder / uuid.uuid4().hex
                     run.mkdir()
                     (run / 'work').mkdir()
                     source = run / 'input.wav'
                     source.touch()
-                    p = configuration.profile() | {'initial_prompt': prompt}
+                    p = configuration.profile(ident) | {'initial_prompt': prompt, 'audio_timeline_mode': timeline_mode}
                     (run / 'request.json').write_text(json.dumps({'config': self.config, 'parameters': p,
                         'source': str(source), 'mode': 'transcribe'}), encoding='utf-8')
                     manifest = {'warnings': [], 'status': 'running', 'parameters': p,
@@ -103,6 +160,8 @@ class PromptTests(unittest.TestCase):
                     (run / 'run.json').write_text(json.dumps(manifest), encoding='utf-8')
 
                     def transcribe(c, params, wav, resources, stage):
+                        self.assertEqual(params['id'], ident)
+                        self.assertEqual(params['audio_timeline_mode'], timeline_mode)
                         self.assertEqual(params['initial_prompt'], prompt)
                         if failure == 'before_loading':
                             raise RuntimeError('audio load failed')
@@ -124,16 +183,18 @@ class PromptTests(unittest.TestCase):
                     with patch.object(sys, 'stdin', io.StringIO('GO\n')), patch.object(sys, 'argv', ['worker', str(run)]), \
                          patch('worker.safety.install'), patch('worker.media.probe', return_value={'warnings': []}), \
                          patch('worker.media.command', return_value='tool version'), \
-                         patch('worker.media.prepare', return_value={'warnings': [], 'metadata': {'duration': 1}}), \
+                         patch('worker.media.prepare', return_value={'warnings': [], 'metadata': {'duration': 1}}) as prepare, \
                          patch('engine.preflight', return_value={'versions': {}}), patch('engine.transcribe', side_effect=transcribe), \
                          patch('worker.export'), patch('worker.complete'), patch('worker.warnings.showwarning'), \
                          contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
                         code = worker.main()
+                        self.assertTrue(prepare.called, output.getvalue())
+                        self.assertEqual(prepare.call_args.args[-1], timeline_mode)
                     final = json.loads((run / 'run.json').read_text(encoding='utf-8'))
-                    self.assertEqual(code, 1 if failure else 0)
+                    self.assertEqual(code, 1 if failure else 0, output.getvalue())
                     self.assertEqual(final['status'], 'failed' if failure else 'succeeded')
                     expected = {'before_loading': 'not_submitted', 'loading': 'submission_unconfirmed'}.get(failure, 'accepted_by_engine')
-                    self.assertEqual(final['initial_prompt_state'], expected)
+                    self.assertEqual(final['initial_prompt_state'], expected, output.getvalue())
                     self.assertEqual(final['initial_prompt'], prompt if expected == 'accepted_by_engine' else None)
                     self.assertEqual(final['parameters']['initial_prompt'], prompt)
                     self.assertNotIn(PROMPT, output.getvalue())

@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
-from configuration import load, profile
+from configuration import PROFILES, load, profile
 from controller import Controller
 
 STAGES = {'starting': 'Uruchamianie', 'probe': 'Rozpoznawanie pliku', 'preflight': 'Kontrola zasobów offline',
@@ -21,6 +21,9 @@ class App:
         self.root, self.config = root, config
         self.controller = Controller(config)
         self.profile = profile()
+        self.profiles = {ident: self.profile if ident == self.profile['id'] else profile(ident)
+                         for ident in PROFILES}
+        self.profile_ids = tuple(self.profiles)
         self.closing = False
         root.title('WhisperX — lokalna transkrypcja')
         root.geometry('940x810')
@@ -29,9 +32,15 @@ class App:
         frame.pack(fill='both', expand=True)
         frame.columnconfigure(1, weight=1)
         frame.rowconfigure(10, weight=1)
-        ttk.Label(frame, text=self.profile['name'], font=('Segoe UI', 15, 'bold')).grid(row=0, column=0, columnspan=3, sticky='w', pady=(0, 14))
         self.source = tk.StringVar()
         self.controls = []
+        ttk.Label(frame, text='Profil').grid(row=0, column=0, sticky='w', pady=(0, 14))
+        self.profile_box = ttk.Combobox(frame, values=[p['name'] for p in self.profiles.values()],
+                                       state='readonly', width=42)
+        self.profile_box.current(0)
+        self.profile_box.grid(row=0, column=1, columnspan=2, sticky='ew', padx=8, pady=(0, 14))
+        self.profile_box.bind('<<ComboboxSelected>>', self.change_profile)
+        self.controls.append((self.profile_box, 'readonly'))
         ttk.Label(frame, text='Nagranie').grid(row=1, column=0, sticky='w')
         entry = ttk.Entry(frame, textvariable=self.source)
         entry.grid(row=1, column=1, sticky='ew', padx=8)
@@ -85,6 +94,17 @@ class App:
         if path:
             self.source.set(path)
             self.metadata.set('Wybrano nowy plik — kliknij Sprawdź plik.')
+
+    def change_profile(self, event=None):
+        if self.controller.active:
+            self.profile_box.current(self.profile_ids.index(self.profile['id']))
+            return
+        self.profile = dict(self.profiles[self.profile_ids[self.profile_box.current()]])
+        for key, value in self.values.items():
+            value.set(str(self.profile[key]))
+        self.alignment.set(self.profile['alignment'])
+        self.prompt.delete('1.0', 'end')
+        self.prompt.insert('1.0', self.profile.get('initial_prompt') or '')
 
     def start(self, mode):
         try:
