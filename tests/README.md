@@ -29,3 +29,11 @@ Testy tworzą własne katalogi runs i nie sprzątają ich automatycznie. Nie ins
 - `unicode`: identyczne launchery i moduły w katalogu ze spacjami/polskimi znakami; sprawdź i zamknij rzeczywiste GUI, kod 0.
 
 Testy nie zastępują GUI atrapą i nie uruchamiają silnika. Błędne konfiguracje są tworzone wyłącznie w nowych katalogach runs/launcher_UUID; hash konfiguracji użytkownika jest kontrolowany. Limit 120 s; po jego przekroczeniu test kończy tylko własne drzewo procesów. Skrypt PowerShell musi pozostać ASCII, co sprawdza test. Dla ręcznego odbioru końcowego użyj dwukliku Start.cmd.
+
+## Kolejna wersja — dwa profile i opcjonalny preserve
+
+Dotychczasowe discover uruchamia teraz 22 testy (w tym 32 podprzypadki orkiestracji workera). Dodano: rejestr i zgodność ID pliku, domyślne wartości, bajtową zgodność webinarowego JSON z tagiem, walidację trybu, A → B → A i reset wszystkich pól w prawdziwym Tkinter, blokadę wyboru i przywrócenie dla stanów końcowych, snapshoty obu profili/trybów przez rzeczywisty worker, niezmienione polecenie legacy, syntetyczną przerwę PTS, odmowę nadpisania WAV i ograniczone ponowienie podmiany JSON przy blokadzie Windows. Atrapy ASR pozostają jawne. Czyszczenie cykli Tk w testach odbywa się w głównym wątku, aby nie trafiły do kolektora wątku kontrolera.
+
+check_engine.py i check_cancellation.py przyjmują opcjonalnie po ścieżce próbki ID profilu i tryb audio, np. `'<krótka próbka.wav>' sesja_rady_gminy preserve`. Bez nowych argumentów nadal używają webinaru/legacy. Nie używaj pełnej sesji do testu silnika. check_exports.py dodatkowo sprawdza zachowanie słów z timestampami i bez nich w JSON.
+
+[Raport wykonania i AUDIO-01](../NEXT_VERSION_IMPLEMENTATION_PLAN.md#5-wykonanie-i-wyniki--18102026) odróżnia rzeczywisty krótki ASR, pomiary waveform, atrapy i niewykonane kontrole użytkownika. Dane i pełne logi pozostają poza Git w runs.

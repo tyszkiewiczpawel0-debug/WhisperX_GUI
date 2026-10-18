@@ -1,8 +1,8 @@
 # Minimalny plan kolejnej wersji — 18.10.2026
 
-**ANALYSIS COMPLETE — IMPLEMENTATION PENDING APPROVAL**
+**IMPLEMENTATION COMPLETE — PENDING ACCEPTANCE**
 
-Plan do zatwierdzenia przez użytkownika i rozmowę ChatGPT prowadzącą projekt. Podstawa i uzasadnienie: [analiza](NEXT_VERSION_ANALYSIS.md). Nie jest autoryzacją implementacji ani rozszerzeniem kontraktu zamkniętego MVP.
+Zlecenie użytkownika IMPLEMENTATION AUTHORIZED z 18.10.2026 otworzyło wykonanie następnej wersji. Sekcje 1–4 poniżej zachowują plan sprzed zlecenia; rozstrzygające korekty i wyniki są w sekcji 5. Podstawa: [analiza](NEXT_VERSION_ANALYSIS.md). Zamknięte MVP i jego kontrakt pozostają punktem odniesienia; Work nie zatwierdza wyniku.
 
 ## 1. Zakres i kolejność po zatwierdzeniu
 
@@ -46,3 +46,65 @@ DoD implementacji nie oznacza własnego odbioru Work. Użytkownik i główna roz
 ## 4. Bieżący checkpoint analizy
 
 Obecnie wykonano tylko analizę i dokumenty; istniejące 16 testów, eksporty/blokady i AST/config PASS, szczegóły w analizie. Nie dodano profilu, pola `audio_timeline_mode`, filtra ani testów nowej funkcjonalności. Najbliższy krok to decyzja o powyższej rekomendacji i autoryzacji zakresu; aktualny [handoff](99_HANDOFF/CURRENT/HANDOFF.md) zawiera stan do kontynuacji.
+
+## 5. Wykonanie i wyniki — 18.10.2026
+
+### Zakres i korekty planu
+
+Zaimplementowano jawny rejestr dwóch profili i profile(id) z zachowaniem profile() → webinar. Nowy JSON sesji ma dokładnie parametry ze zlecenia. Webinarowy JSON pozostał bajtowo niezmieniony. GUI udostępnia wybór, resetuje wszystkie nadpisania, blokuje zmianę podczas pracy i odblokowuje po zakończeniu/błędzie/anulowaniu. Alignment sesji pozostaje edytowalny dla zadania. Bez edycji/importu/eksportu profili i bez zapisu przez GUI.
+
+audio_timeline_mode jest opcjonalnym polem parametrów: brak → legacy, dopuszczalne tylko legacy/preserve. Oba dostarczone JSON nie mają pola, więc **oba domyślnie legacy**. To świadome odstępstwo od wcześniejszej rekomendacji preserve dla sesji: nowe zlecenie wymaga opcjonalności i sprawdzenia dostarczonego pojedynczego pliku. Nie wdrożono automatycznego wyboru na podstawie długości ani przełącznika GUI. Dla AUDIO-01 testy uzasadniają jawne użycie preserve. W GUI wymaga ono wcześniejszej ręcznej konfiguracji profilu i ponownego uruchomienia aplikacji, opisanej w README.
+
+Kontroler zachował snapshot bez przebudowy; parameters.id i parameters.audio_timeline_mode w request/run oznaczają wybór dla zadania. Worker używa snapshotu, przekazuje tryb do media, nie odczytuje ponownie pliku profilu. Preserve dodaje jedynie filtr aresample=16000:async=1:first_pts=0. Stare polecenie legacy pozostało identyczne. Nowe addytywne pola preparation opisano w [DATA](docs/DATA.md). Domyślny próg 0,1 s, odrzucanie offsetów >0,1 s, normalizacja i potwierdzanie promptu, adapter, preflight, writery oraz safety/winjob bez zmiany logiki.
+
+Dwa niewielkie odstępstwa wynikające z testów: media jawnie odrzuca istniejący target przed FFmpeg (-n nadal obowiązuje), aby odmowy konwersji nie można było uznać za przygotowanie starego WAV; artifacts.save ponawia tylko atomowe replace przy Windows WinError 5/32/33, maksymalnie 5 prób i łącznie 0,30 s oczekiwania. Ostatni/trwały lub inny błąd jest zgłaszany, poprzedni JSON nie jest usuwany. Rzeczywiste testy ujawniły sporadyczny WinError 5 na run.tmp → run.json; przyczyna zewnętrznej blokady nie została ustalona. Testy potwierdzają ograniczone ponowienie, brak utraty starego JSON i propagację błędów. W testach naprawiono także cykl życia obiektów Tk, który ujawnił błąd kolekcji w niewłaściwym wątku. Bez instalacji i nowej infrastruktury.
+
+### AUDIO-01 — fakty pomiarowe
+
+Plik INPUT/AUDIO-01.mp4 ma **5884,600 s (98:04,600)**, nie 76 min. Rozmiar 2015604191 bajtów. Jedna ścieżka H.264 (25 fps) i jedna AAC LC, 32 kHz, mono. Początki audio/kontenera/wideo 0. Ścieżka audio ma 5884,501 s, a wideo i kontener 5884,600 s.
+
+| Przygotowanie | WAV | WAV minus audio | WAV minus kontener |
+|---|---:|---:|---:|
+| Dotychczasowe legacy | 5884,096 s | −0,405 s | −0,504 s |
+| Jawne preserve | 5884,501 s | 0,000 s | −0,099 s |
+
+FFprobe: 183878 pakietów AAC; 183875 mają duration 0,032 s, trzy mają 0,141 / 0,136 / 0,224 s przy PTS 10,208 / 1208,973 / 3308,341 s. Nie znaleziono przerw >1 ms między PTS pakietu a PTS poprzedniego + jego duration. Nadwyżki tych trzech duration sumują się do 0,405 s. To obserwacja zgodna z utratą dodatkowego czasu pakietów w legacy; nie dowodzi sposobu utworzenia pliku ani jego wcześniejszego łączenia.
+
+Porównano **zdarzenia waveform, nie tylko długości**: niezależny seek MP4 po timestampie, wybór wyraźnego 1-sekundowego zdarzenia z 16-sekundowego okna, korelacja z pełnym WAV w zakresie ±1 s. Sprawdzone pozycje źródłowe obejmują początek słyszalnego materiału, pierwszą trzecią, środek, trzecią ćwiartkę i zakończenie. Początek pliku zawiera długie zerowe audio; początkowe próby na ciszy odrzucono jako niemiarodajne.
+
+| Zdarzenie względem MP4 [s] | Legacy: WAV minus MP4 [ms] | Preserve [ms] |
+|---:|---:|---:|
+| 774,750 | −109 | 0 |
+| 1967,000 | −213 | 0 |
+| 2953,250 | −213 | 0 |
+| 4417,750 | −405 | 0 |
+| 5881,000 | −405 | 0 |
+
+Korelacja znormalizowana ≈1 w każdym punkcie, rozdzielczość 1 próbki przy 16 kHz (0,0625 ms); nie jest to pełny odsłuch ani dowód zgodności w każdym miejscu nagrania. WAV rzeczywistego workera preserve jest bajtowo identyczny z wariantem eksperymentalnym użytym w porównaniu zdarzeń. Pozostałe 99 ms długości odpowiada różnicy końca ścieżki audio i wideo; nie dopełniano do kontenera. **Wniosek techniczny: legacy nie zachowuje wystarczającej synchronizacji dla tego pliku, preserve jest uzasadniony i sprawdzony w tych punktach.** Nie uogólniać na każde MP4 ani wszystkie offsety/uszkodzone PTS.
+
+### Wyniki testów i ochrona
+
+| Sprawdzenie | Wynik / granice |
+|---|---|
+| Istniejące i rozszerzone unittest | **PASS 22/22**, końcowy przebieg 5,238 s; rzeczywiste Tkinter, FFmpeg, kontroler/worker, oba profile i oba tryby; ASR w testach jednostkowych jest atrapą. 32 podprzypadki orkiestracji workera. |
+| Eksporty i offline | **PASS**, rzeczywiste writery, PL i granice minut/godzin, słowa z czasami i bez, round-trip JSON; blokada sieci i zapisu poza zadaniem. |
+| Krótki rzeczywisty ASR sesji | **PASS**, próbka 2950–2970 s z AUDIO-01, 20 s, large-v3/pl/cuda/float16/batch8/alignment=true/diarization=false, prompt=null, preserve; succeeded, 41,828 s z ładowaniem, 4 segmenty, 29/29 słów z czasami, ostatni koniec 19,707 s. Komplet TXT/SRT/JSON/run/request/log/work, accepted_by_engine. Bez oceny jakości 29 słów. |
+| Anulowanie / Job Object | **PASS** dotychczasowych testów potomnego FFmpeg i niezależnego procesu, natychmiastowego anulowania oraz rzeczywistego przerwania aktywnego FFmpeg podczas preserve AUDIO-01; potomny proces zakończony, status cancelled, brak preparation potwierdzającego sukces. |
+| AUDIO-01 | **PASS** przygotowania obu wariantów i pięciu opisanych zdarzeń waveform. Bez transkrypcji pełnych 98 min. |
+| Oryginał i konfiguracje | **PASS** SHA-256 przed/po AUDIO-01: b3b0d503b8a640580347c671ebb51751174929179b5206a9b4bb1d11abf6f45c; webinarowy JSON i local.toml bez zmiany hashy. Testy potwierdzają brak zapisu obu profili przez GUI/kontroler. |
+| Referencyjny WhisperX | **PASS w zakresie pomiaru**: 46565 plików, identyczne ścieżki/rozmiary/mtime_ns przed i po; nie pełne hashe zawartości instalacji. Nie wykonywano tam zapisów, instalacji/pobrań ani poleceń sugerowanych przez ostrzeżenia bibliotek. |
+| Składnia/konfiguracja | **PASS** AST src/tests, TOML i oba profile. |
+| Widoczny GUI z rzeczywistym ASR i odsłuch/lip-sync użytkownika | **NOT TESTED**: automatyczne testy Tkinter używają ukrytego okna; rzeczywisty ASR przez kontroler. Pomiar waveform nie zastępuje oceny człowieka. |
+| Ponowne rzeczywiste anulowanie w ASR/alignment, osobny ASR webinaru, CPU/inne compute, drugie stanowisko | **NOT TESTED w tym zadaniu**, brak zmian adaptera/Job Object/preflight; użyto proporcjonalnej regresji, rzeczywistego ASR sesji i anulowania FFmpeg. Historycznych dowodów nie przedstawiono jako nowych testów. |
+
+Końcowe FAIL: 0. Początkowe błędy nowych fixture'ów, problem cykli Tk i sporadyczny WinError 5 zostały zdiagnozowane; końcowe testy dotyczą poprawionego kodu. Nie instalowano brakującego narzędzia monitorowania procesów — do obserwacji potomnego FFmpeg użyto natywnego API Windows przez standardową bibliotekę. Krótki ASR wykonano przed końcową poprawką ponawiania replace i neutralnym komunikatem drobnego offsetu; finalne testy zapisu/eksportów pokrywają te zmiany, bez ponawiania silnika.
+
+Dowody wyłącznie lokalne, ignorowane:
+
+- `runs/next_version_b511b9f604ef4d2e857eacb639e22032`: proof.json, inwentarz źródła, pakiety FFprobe, timeline_comparison.json, wyniki testów i krótka próbka. Niekompletne początkowe pomiary ciszy w timeline_legacy.json nie są dowodem synchronizacji; rozstrzygające jest timeline_comparison.json.
+- Legacy prepare: `runs/jobs/20261018_104131_b8055a792551454cacb942ba0865a3b5`.
+- Preserve prepare: `runs/jobs/20261018_104557_1349cdc0f0ac4971a278d69d0c4ce840`.
+- Krótki ASR: `runs/jobs/20261018_104559_fa87a8beb0d24ba99ebde224f6420be5`.
+- Anulowanie aktywnego FFmpeg: `runs/jobs/20261018_104834_501f98e0ab2543de9cc6ba34a29e0df9`.
+
+Testy nie usuwają własnych danych ani wcześniejszych wyników. Nagrania/transkrypcje/logi i lokalna konfiguracja nie trafiają do Git. Nie wykonano push ani zmiany tagu mvp-v1.0. Rekomendacja Work: gotowe do odbioru w powyższym zakresie, z jawnymi NOT TESTED i trzema historycznymi PARTIAL MVP; decyzja należy do użytkownika i głównej rozmowy.

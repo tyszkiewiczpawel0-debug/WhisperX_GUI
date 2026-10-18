@@ -13,7 +13,7 @@ run.json: identyfikator, status/etap, źródło, parametry, modele/revizje, wers
 
 Zachowujemy pośrednie po sukcesie, błędzie i anulowaniu. Aplikacja nie usuwa istniejących plików. Awaria całego GUI/systemu może pozostawić running; ponowienie tworzy nowe zadanie bez automatycznej naprawy. TXT/SRT przy failed/cancelled nie oznaczają sukcesu.
 
-Próg różnicy długości 0,1 s jest konfigurowalnym założeniem. Brak audio, wiele ścieżek i offset ponad 0,1 s są odrzucane. Drobny offset jest raportowany; napisy względem początku dekodowanego audio. Przy braku długości ścieżki używana jest długość kontenera jako przybliżenie. Brak obu uniemożliwia porównanie. Bez korekty ciszy, tempa i osi czasu.
+Próg różnicy długości 0,1 s jest konfigurowalnym założeniem. Brak audio, wiele ścieżek i offset ponad 0,1 s są odrzucane. Drobny offset jest raportowany; w legacy napisy względem początku dekodowanego audio. Przy braku długości ścieżki używana jest długość kontenera jako przybliżenie. Brak obu uniemożliwia porównanie. Legacy nie koryguje ciszy, tempa i osi czasu.
 
 D2 użył syntetycznych WAV/MKV oraz wycinka 30–50 s istniejącego źródłowego WAV, zapisanego w runs/d2_checks. To nie webinar RUI. W Git są tylko kod, konfiguracja przykładowa/profil, testy i dokumenty; źródło, środowisko i modele pozostają tylko do odczytu.
 
@@ -28,3 +28,23 @@ D2 użył syntetycznych WAV/MKV oraz wycinka 30–50 s istniejącego źródłowe
 | accepted_by_engine | load_model przyjął opcje; główne initial_prompt zawiera tekst albo null dla świadomie pustego promptu |
 
 Stan accepted_by_engine nie gwarantuje wygenerowania segmentów ani jakości użycia kontekstu. Późniejszy błąd/anulowanie zachowuje potwierdzoną wartość. Zapis przed wywołaniem i po powrocie jest celowo ostrożny: zabicie procesu między powrotem biblioteki a zapisem może pozostawić submission_unconfirmed. Nie udajemy atomowości operacji biblioteki i zapisu JSON. Pełny tekst nie jest dopisywany przez aplikację do process.log; pozostaje prywatną zawartością request.json/run.json poza Git.
+
+## Kolejna wersja — tożsamość profilu i przygotowanie
+
+parameters.id w request.json i run.json identyfikuje WEBINAR_RUI_PL albo sesja_rady_gminy. Nie ma dodatkowego profile_id. Schema_version pozostaje 1; rozszerzenia są addytywne. Pusty prompt obu profili nadal normalizowany jest do null.
+
+parameters.audio_timeline_mode zapisuje wybrany tryb legacy/preserve, także gdy przygotowania jeszcze nie wykonano. Brak pola w starszym request oznacza legacy. Domyślny profil sesji nie wymusza preserve.
+
+Po udanym przygotowaniu preparation zawiera dodatkowo:
+
+| Pole | Znaczenie |
+|---|---|
+| audio_timeline_mode | Faktycznie ukończony wariant przygotowania |
+| timeline_reference | decoded_audio_start dla legacy; source_timestamps_zero dla preserve, gdzie filtr przyjmuje first_pts=0 |
+| source_audio_duration_seconds | Długość ścieżki, null jeśli użyto przybliżenia kontenerem |
+| source_container_duration_seconds | Długość kontenera z FFprobe, albo null |
+| container_duration_delta_seconds | WAV minus kontener, albo null |
+
+Istniejące preparation.metadata.duration to długość WAV, a duration_delta_seconds nadal porównuje z source.metadata.duration (audio albo dotychczasowe przybliżenie). preparation.command zachowuje pełne polecenie z filtrem tylko dla preserve. Ten wariant ostrzega także o różnicy względem kontenera powyżej tego samego progu, bez zmiany znaczenia starej delty. Pełne surowe metadane źródła i WAV pozostają zachowane.
+
+Brak preparation po błędzie/anulowaniu nie potwierdza wykonania wybranego wariantu. Częściowy WAV jest zachowywany. timeline_reference opisuje założenie polecenia, nie certyfikat synchronizacji mowy/wideo. Ograniczenia offsetów i wyboru ścieżki pozostają bez zmian; preserve nie odtwarza nieznanej referencji ani nie przesuwa gotowych eksportów.

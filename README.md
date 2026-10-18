@@ -1,6 +1,8 @@
 # WHISPERX_GUI
 
-Lokalne GUI Tkinter do przygotowania i transkrypcji pojedynczego nagrania. Jeden profil WEBINAR_RUI_PL, bez diarizacji, streszczeń i kolejki.
+Lokalne GUI Tkinter do przygotowania i transkrypcji pojedynczego nagrania. Profile WEBINAR_RUI_PL i sesja_rady_gminy, bez diarizacji, streszczeń i kolejki.
+
+**Kolejna wersja: IMPLEMENTATION COMPLETE — PENDING ACCEPTANCE.** [Zakres, wyniki testów i AUDIO-01](NEXT_VERSION_IMPLEMENTATION_PLAN.md#5-wykonanie-i-wyniki--18102026). Zamknięte MVP pozostaje punktem odniesienia w tagu mvp-v1.0.
 
 **MVP v1 CLOSED / D4 APPROVED — decyzja użytkownika z 14.10.2026.** [Ocena MVP: 6 PASS, 3 PARTIAL, 0 FAIL](docs/D4_MVP_REVIEW.md). Trzy PARTIAL pozostają: pełny przebieg sterowany przez widoczne GUI, pomiar responsywności podczas silnika i test drugiego stanowiska. [Raport D3](docs/D3_PILOT_REPORT.md). Dowody: [raport D2.1](docs/D2_1_TEST_REPORT.md), [raport D2](docs/D2_TEST_REPORT.md), [stan](docs/CURRENT_STATE.md), [handoff](99_HANDOFF/CURRENT/HANDOFF.md).
 
@@ -9,7 +11,7 @@ Lokalne GUI Tkinter do przygotowania i transkrypcji pojedynczego nagrania. Jeden
 1. Otwórz `Start.cmd` dwuklikiem. Korzysta z interpretera w ignorowanym `config/local.toml`; nie instaluje pakietów. Polityka PowerShell dotyczy wyłącznie procesu uruchomienia, bez zmiany ustawień Windows.
 2. Kliknij **Wybierz plik**, następnie **Sprawdź plik**. Zobaczysz format, kodek, czas, częstotliwość, kanały i ostrzeżenia.
 3. Opcjonalnie **Przygotuj WAV** sprawdza konwersję bez silnika.
-4. Sprawdź urządzenie, typ obliczeń, batch i alignment. Pole **Prompt transkrypcji (opcjonalny)** zawiera domyślny tekst profilu; możesz go edytować lub wyczyścić dla bieżącego uruchomienia. Profil nie zostanie zmieniony. **Transkrybuj** wykonuje pełny przebieg od oryginału, z własnym przygotowaniem WAV. Każda operacja tworzy osobny katalog; nie wznawia poprzedniego zadania.
+4. Wybierz **Profil** (domyślnie webinar). Zmiana profilu resetuje wcześniejsze nadpisania, w tym prompt. Sprawdź urządzenie, typ obliczeń, batch i alignment; alignment sesji można wyłączyć dla zadania. Pole **Prompt transkrypcji (opcjonalny)** zawiera domyślny tekst profilu; możesz go edytować lub wyczyścić dla bieżącego uruchomienia. Profil nie zostanie zmieniony. **Transkrybuj** wykonuje pełny przebieg od oryginału, z własnym przygotowaniem WAV. Każda operacja tworzy osobny katalog; nie wznawia poprzedniego zadania. Wybór profilu jest zablokowany podczas pracy.
 5. **Przerwij** kończy wyłącznie procesy bieżącego zadania. Zamknięcie okna podczas pracy również anuluje zadanie i czeka na zapis stanu. **Otwórz wyniki** pokazuje ostatni katalog.
 
 Lokalną konfigurację przygotowano w D2. Wyniki są w `runs/jobs/`, poza Git; dane testowe w innych podkatalogach `runs/`. Alternatywa: uruchom `Start.ps1` z PowerShell albo skonfigurowanym Pythonem `-B src/gui.py`. Nie uruchamiaj ani nie importuj źródłowego transcribe_trip_meeting.py.
@@ -22,7 +24,11 @@ Udana transkrypcja zawiera transcript.txt, transcript.srt, transcript.json, run.
 
 Przygotowanie: PCM s16le / 16 kHz / mono. Próg ostrzeżenia długości 0,1 s jest konfigurowalny i nie gwarantuje synchronizacji. MVP odrzuca wiele ścieżek audio i offsety powyżej 0,1 s. Drobne niezerowe offsety są raportowane; napisy odnoszą się do początku zdekodowanego audio. Długość kontenera zastępuje brakującą długość ścieżki wyłącznie jako przybliżenie. Nie ma cichej korekty czasu.
 
-Model large-v3 i język pl są stałe dla jedynego profilu. Można zmieniać urządzenie cuda/cpu, float16/float32/int8, batch 1–64 i alignment. CPU z float16 jest odrzucany. Nie ma automatycznej zmiany parametrów po błędzie. CPU i alternatywne typy obliczeń nie przeszły pełnego testu D2.
+Model large-v3 i język pl są stałe dla obu profili. Można zmieniać urządzenie cuda/cpu, float16/float32/int8, batch 1–64 i alignment. CPU z float16 jest odrzucany. Nie ma automatycznej zmiany parametrów po błędzie. CPU i alternatywne typy obliczeń nie przeszły pełnego testu D2.
+
+Opcjonalne pole profilu `audio_timeline_mode` przyjmuje `legacy` albo `preserve`; brak oznacza `legacy`, inna wartość to błąd. Oba dostarczone profile zachowują legacy. Preserve dodaje filtr FFmpeg `aresample=16000:async=1:first_pts=0`, a wybrany tryb i faktyczne polecenie zapisuje w wynikach. Nie ma automatycznego przełączenia ani przycisku tego trybu w GUI.
+
+**AUDIO-01:** zwykłe przygotowanie przesuwa sprawdzone zdarzenia o 109–405 ms; dla tego materiału zalecany jest jawny preserve. Aby użyć go z GUI, przed uruchomieniem aplikacji dodaj do `config/sesja_rady_gminy.json` pole `"audio_timeline_mode": "preserve"` (z poprawnym przecinkiem między polami). Jest to ręczna, trwała konfiguracja kolejnych zadań tego profilu; GUI jej nie zapisuje. Po zmianie pliku uruchom aplikację ponownie. Aby wrócić do domyślnej metody, usuń to pole albo wpisz legacy. Wyniki i ograniczenia pomiaru opisuje plan; filtr nie gwarantuje synchronizacji dowolnego pliku.
 
 Opcjonalne pole JSON `initial_prompt` przyjmuje tekst albo null. Brak pola, null, pusty tekst lub same białe znaki oznaczają brak promptu. Dostarczony profil ma pustą wartość. Niepusty tekst jest przekazywany bez zmian i zapisywany w metadanych; biblioteka usuwa skrajne białe znaki przed tokenizacją i wykorzystuje najwyżej ostatnie 223 tokeny promptu. Stosuj krótki kontekst lub terminologię; prompt nie gwarantuje poprawnej transkrypcji. Szczegóły zapisu przy błędzie/anulowaniu: [dane](docs/DATA.md).
 

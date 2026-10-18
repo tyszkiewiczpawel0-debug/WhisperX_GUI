@@ -1,5 +1,7 @@
 # Analiza kolejnej wersji — 18.10.2026
 
+**Dokument historyczny analizy.** Późniejsze zlecenie użytkownika IMPLEMENTATION AUTHORIZED zastępuje oczekiwanie na zgodę poniżej. Wyniki implementacji i nowa obserwacja o pojedynczym AUDIO-01: [plan i raport](NEXT_VERSION_IMPLEMENTATION_PLAN.md#5-wykonanie-i-wyniki--18102026). W szczególności preserve jest opcjonalny, a oba dostarczone profile pozostają domyślnie legacy; wcześniejsza rekomendacja domyślnego preserve dla sesji nie została wdrożona.
+
 **ANALYSIS COMPLETE — IMPLEMENTATION PENDING APPROVAL**
 
 Odbiorcy: rozmowa ChatGPT prowadząca projekt WhisperX_GUI oraz użytkownik.
